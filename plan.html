@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onboarding Flow — Stack Completa</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #08080c;
+            color: #d0d0d8;
+            padding: 40px 20px;
+            line-height: 1.65;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 30px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stack-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 0;
+        }
+
+        .stack-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .stack-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .badge-evolution {
+            background: #25d36612;
+            color: #25d366;
+            border: 1px solid #25d36625;
+        }
+
+        .badge-evolution .dot {
+            background: #25d366;
+        }
+
+        .badge-n8n {
+            background: #ea4b7122;
+            color: #ea4b71;
+            border: 1px solid #ea4b7130;
+        }
+
+        .badge-n8n .dot {
+            background: #ea4b71;
+        }
+
+        .badge-chatwoot {
+            background: #1f93ff18;
+            color: #1f93ff;
+            border: 1px solid #1f93ff28;
+        }
+
+        .badge-chatwoot .dot {
+            background: #1f93ff;
+        }
+
+        .badge-typebot {
+            background: #6c63ff18;
+            color: #6c63ff;
+            border: 1px solid #6c63ff28;
+        }
+
+        .badge-typebot .dot {
+            background: #6c63ff;
+        }
+
+        .badge-strava {
+            background: #fc4c0218;
+            color: #fc4c02;
+            border: 1px solid #fc4c0228;
+        }
+
+        .badge-strava .dot {
+            background: #fc4c02;
+        }
+
+        .badge-db {
+            background: #ffd70015;
+            color: #d4aa20;
+            border: 1px solid #ffd70025;
+        }
+
+        .badge-db .dot {
+            background: #ffd700;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 36px;
+            background: #0e0e14;
+            border-radius: 12px;
+            padding: 4px;
+            border: 1px solid #1a1a24;
+        }
+
+        .tab {
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #555;
+            transition: all 0.2s;
+            border: none;
+            background: none;
+        }
+
+        .tab:hover {
+            color: #999;
+        }
+
+        .tab.active {
+            background: #1a1a26;
+            color: #fff;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.8px;
+            color: #fc4c02;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(to right, #fc4c0233, transparent);
+        }
+
+        .arch-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 36px;
+        }
+
+        @media (max-width: 640px) {
+            .arch-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .arch-card {
+            background: #0f0f16;
+            border: 1px solid #1a1a26;
+            border-radius: 14px;
+            padding: 20px;
+            transition: border-color 0.2s;
+        }
+
+        .arch-card:hover {
+            border-color: #2a2a3a;
+        }
+
+        .arch-card-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 6px;
+        }
+
+        .arch-card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .arch-card-desc {
+            font-size: 13px;
+            color: #555;
+        }
+
+        .arch-card-role {
+            font-size: 12px;
+            color: #444;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .label-evolution {
+            color: #25d366;
+        }
+
+        .label-n8n {
+            color: #ea4b71;
+        }
+
+        .label-chatwoot {
+            color: #1f93ff;
+        }
+
+        .label-typebot {
+            color: #6c63ff;
+        }
+
+        .label-strava {
+            color: #fc4c02;
+        }
+
+        .label-db {
+            color: #d4aa20;
+        }
+
+        .flow {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            margin-bottom: 40px;
+        }
+
+        .flow::before {
+            content: '';
+            position: absolute;
+            left: 23px;
+            top: 32px;
+            bottom: 32px;
+            width: 2px;
+            border-radius: 1px;
+            background: linear-gradient(to bottom, #25d366, #ea4b71, #1f93ff, #6c63ff, #fc4c02, #6c63ff, #ea4b71, #25d366);
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 18px;
+            padding: 10px 0;
+            position: relative;
+        }
+
+        .step-dot {
+            width: 14px;
+            height: 14px;
+            min-width: 14px;
+            border-radius: 50%;
+            margin-top: 18px;
+            margin-left: 17px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .dot-evolution {
+            background: #25d366;
+            box-shadow: 0 0 10px #25d36640;
+        }
+
+        .dot-n8n {
+            background: #ea4b71;
+            box-shadow: 0 0 10px #ea4b7140;
+        }
+
+        .dot-chatwoot {
+            background: #1f93ff;
+            box-shadow: 0 0 10px #1f93ff40;
+        }
+
+        .dot-typebot {
+            background: #6c63ff;
+            box-shadow: 0 0 10px #6c63ff40;
+        }
+
+        .dot-strava {
+            background: #fc4c02;
+            box-shadow: 0 0 10px #fc4c0240;
+        }
+
+        .dot-db {
+            background: #ffd700;
+            box-shadow: 0 0 10px #ffd70040;
+        }
+
+        .step-card {
+            background: #0f0f16;
+            border: 1px solid #1a1a26;
+            border-radius: 12px;
+            padding: 16px 20px;
+            flex: 1;
+            transition: border-color 0.2s;
+        }
+
+        .step-card:hover {
+            border-color: #28283a;
+            background: #111119;
+        }
+
+        .step-tools {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .step-tool {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .tool-evolution {
+            background: #25d36615;
+            color: #25d366;
+        }
+
+        .tool-n8n {
+            background: #ea4b7115;
+            color: #ea4b71;
+        }
+
+        .tool-chatwoot {
+            background: #1f93ff15;
+            color: #1f93ff;
+        }
+
+        .tool-typebot {
+            background: #6c63ff15;
+            color: #6c63ff;
+        }
+
+        .tool-strava {
+            background: #fc4c0215;
+            color: #fc4c02;
+        }
+
+        .tool-db {
+            background: #ffd70015;
+            color: #d4aa20;
+        }
+
+        .step-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .step-desc {
+            font-size: 13px;
+            color: #777;
+        }
+
+        .step-detail {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #1a1a26;
+            font-size: 12px;
+            color: #555;
+            line-height: 1.8;
+        }
+
+        .step-detail code {
+            background: #14141e;
+            color: #b0b0ff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .connector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 0 4px 54px;
+            font-size: 11px;
+            color: #333;
+        }
+
+        .connector .arrow {
+            color: #444;
+        }
+
+        .table-card {
+            background: #0f0f16;
+            border: 1px solid #1a1a26;
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 18px;
+        }
+
+        .table-card:hover {
+            border-color: #28283a;
+        }
+
+        .table-name {
+            font-size: 17px;
+            font-weight: 700;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 3px;
+        }
+
+        .table-purpose {
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 16px;
+        }
+
+        .fields {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .field {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 7px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .field:hover {
+            background: #14141e;
+        }
+
+        .field-name {
+            font-family: 'JetBrains Mono', monospace;
+            color: #d0d0d8;
+            min-width: 210px;
+            font-size: 12px;
+        }
+
+        .field-type {
+            font-size: 11px;
+            color: #777;
+            background: #14141e;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .field-desc {
+            font-size: 12px;
+            color: #444;
+        }
+
+        .field-key {
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 5px;
+            border-radius: 3px;
+            letter-spacing: 0.5px;
+            min-width: 22px;
+            text-align: center;
+        }
+
+        .pk {
+            background: #fc4c0220;
+            color: #fc4c02;
+        }
+
+        .fk {
+            background: #6c63ff20;
+            color: #6c63ff;
+        }
+
+        .uq {
+            background: #25d36620;
+            color: #25d366;
+        }
+
+        .idx {
+            background: #1f93ff20;
+            color: #1f93ff;
+        }
+
+        .note {
+            background: #12120a;
+            border: 1px solid #2a2a0e;
+            border-radius: 10px;
+            padding: 16px 20px;
+            font-size: 13px;
+            color: #998833;
+            margin-top: 14px;
+            margin-bottom: 14px;
+        }
+
+        .note strong {
+            color: #bbaa44;
+        }
+
+        .note code {
+            background: #1a1a10;
+            color: #ccbb66;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .note-blue {
+            background: #0a0e14;
+            border-color: #0e2a44;
+            color: #4488bb;
+        }
+
+        .note-blue strong {
+            color: #66aadd;
+        }
+
+        .note-blue code {
+            background: #0e1a24;
+            color: #6699cc;
+        }
+
+        .webhook-box {
+            background: #0c0c12;
+            border: 1px solid #1a1a26;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #666;
+            line-height: 2;
+            overflow-x: auto;
+        }
+
+        .webhook-box .method {
+            color: #25d366;
+            font-weight: 700;
+        }
+
+        .webhook-box .url {
+            color: #b0b0ff;
+        }
+
+        .webhook-box .comment {
+            color: #444;
+        }
+
+        .integration-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 28px 16px;
+            background: #0c0c12;
+            border: 1px solid #1a1a26;
+            border-radius: 14px;
+            margin-bottom: 28px;
+        }
+
+        .int-node {
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .int-arrow {
+            color: #333;
+            font-size: 18px;
+        }
+
+        .node-user {
+            background: #ffffff10;
+            color: #fff;
+            border: 1px solid #333;
+        }
+
+        .node-wa {
+            background: #25d36618;
+            color: #25d366;
+            border: 1px solid #25d36630;
+        }
+
+        .node-evolution {
+            background: #25d36610;
+            color: #25d366;
+            border: 1px solid #25d36625;
+        }
+
+        .node-chatwoot {
+            background: #1f93ff12;
+            color: #1f93ff;
+            border: 1px solid #1f93ff25;
+        }
+
+        .node-n8n {
+            background: #ea4b7115;
+            color: #ea4b71;
+            border: 1px solid #ea4b7128;
+        }
+
+        .node-typebot {
+            background: #6c63ff12;
+            color: #6c63ff;
+            border: 1px solid #6c63ff25;
+        }
+
+        .node-strava {
+            background: #fc4c0212;
+            color: #fc4c02;
+            border: 1px solid #fc4c0225;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <div style="margin-bottom:48px;">
+            <h1>Onboarding Flow</h1>
+            <p class="subtitle">WhatsApp → Strava — com stack completa de automação</p>
+            <div class="stack-bar">
+                <span class="stack-badge badge-evolution"><span class="dot"></span>Evolution API</span>
+                <span class="stack-badge badge-n8n"><span class="dot"></span>N8N</span>
+                <span class="stack-badge badge-chatwoot"><span class="dot"></span>Chatwoot</span>
+                <span class="stack-badge badge-typebot"><span class="dot"></span>Typebot</span>
+                <span class="stack-badge badge-strava"><span class="dot"></span>Strava OAuth</span>
+                <span class="stack-badge badge-db"><span class="dot"></span>PostgreSQL</span>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('arch')">Arquitetura</button>
+            <button class="tab" onclick="showTab('flow')">Fluxo Passo a Passo</button>
+            <button class="tab" onclick="showTab('schema')">Schema do BD</button>
+            <button class="tab" onclick="showTab('webhooks')">Webhooks & Integrações</button>
+        </div>
+
+        <!-- ====== ARCHITECTURE ====== -->
+        <div id="arch" class="tab-content active">
+            <div class="section-title">Papel de cada ferramenta</div>
+
+            <div class="integration-flow">
+                <div class="int-node node-user">Usuário</div>
+                <span class="int-arrow">→</span>
+                <div class="int-node node-wa">WhatsApp</div>
+                <span class="int-arrow">→</span>
+                <div class="int-node node-evolution">Evolution API</div>
+                <span class="int-arrow">→</span>
+                <div class="int-node node-chatwoot">Chatwoot</div>
+                <span class="int-arrow">↔</span>
+                <div class="int-node node-n8n">N8N</div>
+                <span class="int-arrow">↔</span>
+                <div class="int-node node-typebot">Typebot</div>
+                <span class="int-arrow">→</span>
+                <div class="int-node node-strava">Strava</div>
+            </div>
+
+            <div class="arch-grid">
+                <div class="arch-card">
+                    <div class="arch-card-label label-evolution">Evolution API</div>
+                    <div class="arch-card-title">Ponte com WhatsApp</div>
+                    <div class="arch-card-desc">Conecta seu WhatsApp ao ecossistema. Recebe e envia mensagens via API
+                        REST.</div>
+                    <div class="arch-card-role">Papel: Transporte de mensagens. Faz a ponte entre WhatsApp ↔ Chatwoot e
+                        WhatsApp ↔ Typebot.</div>
+                </div>
+                <div class="arch-card">
+                    <div class="arch-card-label label-chatwoot">Chatwoot</div>
+                    <div class="arch-card-title">Inbox & Histórico</div>
+                    <div class="arch-card-desc">Central de conversas. Armazena histórico, permite atendimento humano e
+                        mantém o contexto do contato.</div>
+                    <div class="arch-card-role">Papel: CRM de conversas. Fonte da verdade do contato + permite takeover
+                        humano quando o bot não resolve.</div>
+                </div>
+                <div class="arch-card">
+                    <div class="arch-card-label label-n8n">N8N</div>
+                    <div class="arch-card-title">Orquestrador</div>
+                    <div class="arch-card-desc">O cérebro da operação. Recebe webhooks, decide o que fazer, roteia entre
+                        Typebot/Chatwoot, grava no banco e dispara ações.</div>
+                    <div class="arch-card-role">Papel: Lógica de negócio. Decide se inicia onboarding, faz follow-up,
+                        processa callback do Strava, gera insights.</div>
+                </div>
+                <div class="arch-card">
+                    <div class="arch-card-label label-typebot">Typebot</div>
+                    <div class="arch-card-title">Fluxo conversacional</div>
+                    <div class="arch-card-desc">Cuida da conversa estruturada: coleta nome, preferências e confirma
+                        ações. UI de arrastar e soltar.</div>
+                    <div class="arch-card-role">Papel: Interface amigável de coleta de dados. O N8N inicia e encerra
+                        sessões do Typebot conforme necessário.</div>
+                </div>
+                <div class="arch-card">
+                    <div class="arch-card-label label-strava">Strava OAuth + Webhooks</div>
+                    <div class="arch-card-title">Dados de atividades</div>
+                    <div class="arch-card-desc">Autorização OAuth2 pra ler atividades. Webhook push pra notificar novas
+                        corridas em tempo real.</div>
+                    <div class="arch-card-role">Papel: Fonte dos dados de treino. O N8N processa os callbacks e webhooks
+                        do Strava.</div>
+                </div>
+                <div class="arch-card">
+                    <div class="arch-card-label label-db">PostgreSQL</div>
+                    <div class="arch-card-title">Base de dados</div>
+                    <div class="arch-card-desc">Armazena users, tokens, atividades e preferências. O N8N lê e grava
+                        diretamente via nó Postgres.</div>
+                    <div class="arch-card-role">Papel: Persistência. Tudo que precisa sobreviver entre sessões fica
+                        aqui.</div>
+                </div>
+            </div>
+
+            <div class="note-blue note">
+                <strong>💡 Quem fala com quem?</strong><br><br>
+                • <strong>Evolution API</strong> → integra com <strong>Chatwoot</strong> (inbox nativo) e com
+                <strong>Typebot</strong> (via integração direta ou N8N)<br>
+                • <strong>Chatwoot</strong> → envia webhooks pro <strong>N8N</strong> a cada mensagem recebida<br>
+                • <strong>N8N</strong> → orquestra tudo: chama o <strong>Typebot</strong> via API, grava no
+                <strong>Postgres</strong>, envia mensagens via <strong>Evolution API</strong>, processa callbacks do
+                <strong>Strava</strong><br>
+                • <strong>Typebot</strong> → coleta dados e devolve pro <strong>N8N</strong> via webhook ao finalizar
+            </div>
+        </div>
+
+        <!-- ====== FLOW ====== -->
+        <div id="flow" class="tab-content">
+            <div class="section-title">Fluxo de Onboarding Completo</div>
+
+            <div class="flow">
+                <div class="step">
+                    <div class="step-dot dot-evolution"></div>
+                    <div class="step-card">
+                        <div class="step-tools">
+                            <span class="step-tool tool-evolution">Evolution API</span>
+                            <span class="step-tool tool-chatwoot">Chatwoot</span>
+                        </div>
+                        <div class="step-title">1. Usuário manda "OI" no WhatsApp</div>
+                        <div class="step-desc">Mensagem chega na Evolution API → cria/atualiza contato no Chatwoot →
+                            dispara webhook pro N8N</div>
+                        <div class="step-detail">
+                            A Evolution API já cria o contato no Chatwoot automaticamente com <code>phone_number</code>
+                            e <code>name</code> do perfil do WhatsApp.<br>
+                            O Chatwoot dispara um webhook <code>message_created</code> pro N8N.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-dot dot-n8n"></div>
+                    <div class="step-card">
+                        <div class="step-tools">
+                            <span class="step-tool tool-n8n">N8N</span>
+                            <span class="step-tool tool-db">Postgres</span>
+                        </div>
+                        <div class="step-title">2. N8N recebe webhook e decide o fluxo</div>
+                        <div class="step-desc">Consulta o banco por <code>phone_number</code>. Novo usuário? Inicia
+                            onboarding. Já existe? Redireciona conforme status.</div>
+                        <div class="step-detail">
+                            <strong>Lógica de roteamento no N8N:</strong><br>
+                            • Usuário novo → cria registro no Postgres com <code>status = started</code> → inicia
+                            Typebot<br>
+                            • Status <code>started</code> ou <code>collecting_info</code> → retoma Typebot<br>
+                            • Status <code>awaiting_strava</code> → reenvia link OAuth<br>
+                            • Status <code>completed</code> → responde normalmente (ou passa pro Chatwoot humano)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-dot dot-typebot"></div>
+                    <div class="step-card">
+                        <div class="step-tools">
+                            <span class="step-tool tool-typebot">Typebot</span>
+                            <span class="step-tool tool-evolution">Evolution API</span>
+                        </div>
+                        <div class="step-title">3. Typebot coleta dados básicos</div>
+                        <div class="step-desc">Fluxo conversacional via WhatsApp — nome, confirmação de interesse e
+                            envio do link do Strava</div>
+                        <div class="step-detail">
+                            O Typebot envia mensagens via integração com Evolution API:<br><br>
+                            → <code>"Como posso te chamar?"</code> → salva <code>first_name</code><br>
+                            → <code>"Qual seu e-mail?"</code> → (opcional) salva <code>email</code><br>
+                            → <code>"Vou te mandar o link pra conectar seu Strava. É rapidinho!"</code><br><br>
+                            Ao finalizar, o Typebot chama um webhook do N8N com os dados coletados.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="connector"><span class="arrow">↓</span> Typebot envia webhook pro N8N com dados coletados
+                </div>
+
+                <div class="step">
+                    <div class="step-dot dot-n8n"></div>
+                    <div class="step-card">
+                        <div class="step-tools">
+                            <span class="step-tool tool-n8n">N8N</span>
+                            <span class="step-tool tool-db">Postgres</span>
+                            <span class="step-tool tool-evolution">Evolution API</span>
+                        </div>
+                        <div class="step-title">4. N8N salva dados e envia link do Strava</div>
+                        <div class="step-desc">Grava nome/email no Postgres, gera URL OAuth2 personalizada e envia pelo
+                            WhatsApp via Evolution API</div>
+                        <div class="step-detail">
+                            O N8N gera a URL com o <code>state</code> vinculado ao <code>user_id</code>:<br><br>
+                            <code>https://strava.com/oauth/authorize?client_id=XXX&redirect_uri=https://seu-dominio.com/strava/callback&state={user_id}&scope=read,activity:read_all</code><br><br>
+                            Atualiza <code>onboarding_status → awaiting_strava</code><br>
+                            Envia a mensagem pelo endpoint <code>POST /message/sendText</code> da Evolution API.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-dot dot-strava"></div>
+                    <div class="step-card">
+                        <div class="step-tools">
+                            <span class="step-tool tool-strava">Strava</span>
+                            <span class="step-tool tool-n8n">N8N</span>
+                            <span class="step-tool tool-db">Postgres</span>
+                        </div>
+                        <div class="step-title">5. Callback do OAuth — Strava autorizado</div>
+                        <div class="step-desc">Usuário clica, autoriza, Strava redireciona com <code>code</code> → N8N
+                            troca por tokens e salva</div>
+                        <div class="step-detail">
+                            O callback chega num webhook do N8N (ou endpoint seu):<br><br>
+                            1. Recebe <code>code</code> + <code>state</code> (user_id)<br>
+                            2. Troca o code por <code>access_token</code> + <code>refresh_token</code> via
+                            <code>POST https://www.strava.com/oauth/token</code><br>
+                            3. Salva tokens + <code>strava_athlete_id</code> na tabela
+                            <code>strava_connections</code><br>
+                            4. Atualiza <code>onboarding_status → strava_connected</code>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="connector"><span class="arrow">↓</span> N8N confirma conexão e inicia coleta de preferências
+                </div>
+
+                <div class="step">
+                    <div class="step-dot dot-typebot"></div>
+                    <div class="step-card">
+                        <div class="step-tools">
+                            <span class="step-tool tool-n8n">N8N</span>
+                            <span class="step-tool tool-typebot">Typebot</span>
+                            <span class="step-tool tool-evolution">Evolution API</span>
+                        </div>
+                        <div class="step-title">6. Preferências de notificação</div>
+                        <div class="step-desc">N8N dispara segundo fluxo do Typebot para configurar notificações</div>
+                        <div class="step-detail">
+                            Após confirmar conexão, o N8N envia via Evolution API:<br>
+                            → <code>"Strava conectado com sucesso! 🎉"</code><br><br>
+                            E inicia novo fluxo do Typebot:<br>
+                            → <code>"Quer receber insights das suas corridas?"</code> →
+                            <code>notify_run_insights</code><br>
+                            → <code>"Resumo semanal de treinos?"</code> → <code>notify_weekly_summary</code><br>
+                            → <code>"Alertas de metas e recordes?"</code> → <code>notify_goals</code><br>
+                            → <code>"Dicas de treino?"</code> → <code>notify_training_tips</code><br><br>
+                            Typebot envia os resultados pro N8N via webhook ao finalizar.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-dot dot-n8n"></div>
+                    <div class="step-card">
+                        <div class="step-tools">
+                            <span class="step-tool tool-n8n">N8N</span>
+                            <span class="step-tool tool-db">Postgres</span>
+                            <span class="step-tool tool-evolution">Evolution API</span>
+                            <span class="step-tool tool-chatwoot">Chatwoot</span>
+                        </div>
+                        <div class="step-title">7. Onboarding completo ✓</div>
+                        <div class="step-desc">Salva preferências, marca onboarding como concluído, envia boas-vindas
+                            final e atualiza Chatwoot</div>
+                        <div class="step-detail">
+                            O N8N executa tudo em sequência:<br><br>
+                            1. Salva preferências na tabela <code>notification_preferences</code><br>
+                            2. Atualiza <code>onboarding_status → completed</code> +
+                            <code>onboarding_completed_at</code><br>
+                            3. Envia mensagem final via Evolution API:
+                            <code>"Tudo pronto! Agora é só correr que eu cuido do resto 🏃"</code><br>
+                            4. Adiciona label <code>onboarded</code> no contato do Chatwoot (pra filtros e
+                            relatórios)<br>
+                            5. Registra webhook do Strava pra receber novas atividades
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-dot dot-n8n"></div>
+                    <div class="step-card" style="border-color: #2a2a0e;">
+                        <div class="step-tools">
+                            <span class="step-tool tool-n8n">N8N</span>
+                            <span class="step-tool tool-strava">Strava</span>
+                            <span class="step-tool tool-db">Postgres</span>
+                        </div>
+                        <div class="step-title">8. (Bônus) Sync inicial de atividades</div>
+                        <div class="step-desc">Puxa as últimas N atividades do Strava pra já ter dados no banco e gerar
+                            um primeiro insight</div>
+                        <div class="step-detail">
+                            Opcional mas recomendado — dá uma boa primeira impressão:<br><br>
+                            1. <code>GET /api/v3/athlete/activities?per_page=10</code><br>
+                            2. Salva na tabela <code>activities</code><br>
+                            3. Gera um insight de boas-vindas:
+                            <code>"Vi que sua última corrida foi de 5km em 28min. Tá indo bem! 💪"</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="note">
+                <strong>💡 Follow-up automático:</strong> Crie um workflow no N8N com trigger de <code>Schedule</code>
+                (diário) que busca users com <code>onboarding_status ≠ completed</code> há mais de 24h e envia lembrete
+                via Evolution API.
+            </div>
+
+            <div class="note-blue note">
+                <strong>💡 Typebot vs N8N — quem faz o quê?</strong><br><br>
+                • <strong>Typebot</strong> cuida da <em>conversa</em> (perguntas, validações, UX amigável)<br>
+                • <strong>N8N</strong> cuida da <em>lógica</em> (roteamento, gravação no banco, chamadas de API,
+                decisões)<br><br>
+                Não misture: evite colocar lógica complexa no Typebot ou conversa no N8N.
+            </div>
+        </div>
+
+        <!-- ====== SCHEMA ====== -->
+        <div id="schema" class="tab-content">
+            <div class="section-title">Estrutura de Dados (4 tabelas)</div>
+
+            <div class="table-card">
+                <div class="table-name">users</div>
+                <div class="table-purpose">Dados do usuário, estado do onboarding e vínculo com Chatwoot</div>
+                <div class="fields">
+                    <div class="field"><span class="field-key pk">PK</span><span class="field-name">id</span><span
+                            class="field-type">uuid</span><span class="field-desc">ID interno</span></div>
+                    <div class="field"><span class="field-key uq">UQ</span><span
+                            class="field-name">phone_number</span><span class="field-type">varchar</span><span
+                            class="field-desc">Formato E.164 (+5511999...)</span></div>
+                    <div class="field"><span class="field-key"></span><span class="field-name">wa_name</span><span
+                            class="field-type">varchar</span><span class="field-desc">Nome do perfil WhatsApp (via
+                            Evolution API)</span></div>
+                    <div class="field"><span class="field-key"></span><span class="field-name">first_name</span><span
+                            class="field-type">varchar</span><span class="field-desc">Nome informado no Typebot</span>
+                    </div>
+                    <div class="field"><span class="field-key"></span><span class="field-name">email</span><span
+                            class="field-type">varchar?</span><span class="field-desc">Opcional</span></div>
+                    <div class="field"><span class="field-key idx">IDX</span><span
+                            class="field-name">chatwoot_contact_id</span><span class="field-type">bigint?</span><span
+                            class="field-desc">ID do contato no Chatwoot</span></div>
+                    <div class="field"><span class="field-key"></span><span
+                            class="field-name">chatwoot_conversation_id</span><span
+                            class="field-type">bigint?</span><span class="field-desc">Conversa ativa no Chatwoot</span>
+                    </div>
+                    <div class="field"><span class="field-key"></span><span
+                            class="field-name">onboarding_status</span><span class="field-type">enum</span><span
+                            class="field-desc">started → collecting_info → awaiting_strava → strava_connected →
+                            completed</span></div>
+                    <div class="field"><span class="field-key"></span><span class="field-name">is_active</span><span
+                            class="field-type">boolean</span><span class="field-desc">Pode desativar sem deletar</span>
+                    </div>
+                    <div class="field"><span class="field-key"></span><span class="field-name">created_at</span><span
+                            class="field-type">timestamp</span><span class="field-desc">Primeiro contato</span></div>
+                    <div class="field"><span class="field-key"></span><span
+                            class="field-name">onboarding_completed_at</span><span
+                            class="field-type">timestamp?</span><span class="field-desc">Quando finalizou</span></div>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-name">strava_connections</div>
+                <div class="table-purpose">Tokens OAuth e dados do Strava — isolados por segurança</div>
+                <div class="fields">
+                    <div class="field"><span class="field-key pk">PK</span><span class="field-name">id</span><span
+                            class="field-type">uuid</span><span class="field-desc"></span></div>
+                    <div class="field"><span class="field-key fk">FK</span><span class="field-name">user_id</span><span
+                            class="field-type">uuid</span><span class="field-desc">→ users.id</span></div>
+                    <div class="field"><span class="field-key uq">UQ</span><span
+                            class="field-name">strava_athlete_id</span><span class="field-type">bigint</span><span
+                            class="field-desc">ID do atleta no Strava</span></div>
+                    <div class="field"><span class="field-key"></span><span class="field-name">access_token</span><span
+                            class="field-type">text</span><span class="field-desc">🔒 Encriptar</span></div>
+                    <div class="field"><span class="field-key"></span><span class="field-name">refresh_token</span><span
+                            class="field-type">text</span><span class="field-desc">🔒 Encriptar</span></div>
+                    <div class="field"><span class="field-key"></span><span
+                            class="field-name">token_expires_at</span><span class="field-type">timestamp</span><span
+                            class="field-desc">Pra saber quando fazer refresh</span></div>
+                    <div class="field"><span class="field-key"></span><span class="field-name">scope</span><span
+                            class="field-type">varchar</span><span class="field-desc">Escopos autorizados</span></div>
+                    <div class="field"><span class="field-key"></span><span class="field-name">connected_at</span><span
+                            class="field-type">timestamp</span><span class="field-desc">Momento da autorização</span>
+                    </div>
+                    <div class="field"><span class="field-key"></span><span class="field-name">is_valid</span><span
+                            class="field-type">boolean</span><span class="field-desc">false se revogou</span></div>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-name">notification_preferences</div>
+                <div class="table-purpose">O que o usuário quer receber — coletado no Typebot, gravado pelo N8N</div>
+                <div class="fields">
+                    <div class="field"><span class="field-key pk">PK</span><span class="field-name">id</span><span
+                            class="field-type">uuid</span><span class="field-desc"></span></div>
+                    <div class="field"><span class="field-key fk">FK</span><span class="field-name">user_id</span><span
+                            class="field-type">uuid</span><span class="field-desc">→ users.id</span></div>
+                    <div class="field"><span class="field-key"></span><span
+                            class="field-name">notify_run_insights</span><span class="field-type">boolean</span><span
+                            class="field-desc">Insights pós-corrida</span></div>
+                    <div class="field"><span class="field-key"></span><span
+                            class="field-name">notify_weekly_summary</span><span class="field-type">boolean</span><span
+                            class="field-desc">Resumo semanal</span></div>
+                    <div class="field"><span class="field-key"></span><span class="field-name">notify_goals</span><span
+                            class="field-type">boolean</span><span class="field-desc">Metas e recordes</span></div>
+                    <div class="field"><span class="field-key"></span><span
+                            class="field-name">notify_training_tips</span><span class="field-type">boolean</span><span
+                            class="field-desc">Dicas personalizadas</span></div>
+                    <div class="field"><span class="field-key"></span><span
+                            class="field-name">quiet_hours_start</span><span class="field-type">time?</span><span
+                            class="field-desc">Não perturbe (ex: 22:00)</span></div>
+                    <div class="field"><span class="field-key"></span><span
+                            class="field-name">quiet_hours_end</span><span class="field-type">time?</span><span
+                            class="field-desc">Fim do silêncio (ex: 07:00)</span></div>
+                    <div class="field"><span class="field-key"></span><span class="field-name">updated_at</span><span
+                            class="field-type">timestamp</span><span class="field-desc">Última alteração</span></div>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-name">activities</div>
+                <div class="table-purpose">Cache local das atividades — recebidas via webhook do Strava, processadas
+                    pelo N8N</div>
+                <div class="fields">
+                    <div class="field"><span class="field-key pk">PK</span><span class="field-name">id</span><span
+                            class="field-type">uuid</span><span class="field-desc"></span></div>
+                    <div class="field"><span class="field-key fk">FK</span><span class="field-name">user_id</span><span
+                            class="field-type">uuid</span><span class="field-desc">→ users.id</span></div>
+                    <div class="field"><span class="field-key uq">UQ</span><span
+                            class="field-name">strava_activity_id</span><span class="field-type">bigint</span><span
+                            class="field-desc">ID original (evita duplicatas)</span></div>
+                    <div class="field"><span class="field-key"></span><span class="field-name">activity_type</span><span
+                            class="field-type">varchar</span><span class="field-desc">Run, Ride, Swim...</span></div>
+                    <div class="field"><span class="field-key"></span><span class="field-name">name</span><span
+                            class="field-type">varchar</span><span class="field-desc">Nome da atividade</span></div>
+                    <div class="field"><span class="field-key idx">IDX</span><span
+                            class="field-name">start_date</span><span class="field-type">timestamp</span><span
+                            class="field-desc">Início (UTC)</span></div>
+                    <div class="field"><span class="field-key"></span><span
+                            class="field-name">distance_meters</span><span class="field-type">float</span><span
+                            class="field-desc">Distância em metros</span></div>
+                    <div class="field"><span class="field-key"></span><span
+                            class="field-name">moving_time_seconds</span><span class="field-type">int</span><span
+                            class="field-desc">Tempo em movimento</span></div>
+                    <div class="field"><span class="field-key"></span><span
+                            class="field-name">elapsed_time_seconds</span><span class="field-type">int</span><span
+                            class="field-desc">Tempo total c/ paradas</span></div>
+                    <div class="field"><span class="field-key"></span><span
+                            class="field-name">total_elevation_gain</span><span class="field-type">float</span><span
+                            class="field-desc">Elevação (metros)</span></div>
+                    <div class="field"><span class="field-key"></span><span class="field-name">average_speed</span><span
+                            class="field-type">float</span><span class="field-desc">m/s</span></div>
+                    <div class="field"><span class="field-key"></span><span class="field-name">max_speed</span><span
+                            class="field-type">float</span><span class="field-desc">Velocidade máxima m/s</span></div>
+                    <div class="field"><span class="field-key"></span><span
+                            class="field-name">average_heartrate</span><span class="field-type">float?</span><span
+                            class="field-desc">BPM médio</span></div>
+                    <div class="field"><span class="field-key"></span><span class="field-name">max_heartrate</span><span
+                            class="field-type">float?</span><span class="field-desc">BPM máximo</span></div>
+                    <div class="field"><span class="field-key"></span><span class="field-name">suffer_score</span><span
+                            class="field-type">int?</span><span class="field-desc">Índice de esforço</span></div>
+                    <div class="field"><span class="field-key"></span><span class="field-name">calories</span><span
+                            class="field-type">float?</span><span class="field-desc">Calorias</span></div>
+                    <div class="field"><span class="field-key"></span><span
+                            class="field-name">average_cadence</span><span class="field-type">float?</span><span
+                            class="field-desc">Cadência média</span></div>
+                    <div class="field"><span class="field-key"></span><span class="field-name">splits_json</span><span
+                            class="field-type">jsonb?</span><span class="field-desc">Splits por km</span></div>
+                    <div class="field"><span class="field-key"></span><span class="field-name">insight_sent</span><span
+                            class="field-type">boolean</span><span class="field-desc">Insight já enviado?</span></div>
+                    <div class="field"><span class="field-key"></span><span class="field-name">synced_at</span><span
+                            class="field-type">timestamp</span><span class="field-desc">Última sincronização</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="note">
+                <strong>💡 Novidade nessa versão:</strong> A tabela <code>users</code> agora tem
+                <code>chatwoot_contact_id</code> e <code>chatwoot_conversation_id</code> — isso permite que o N8N
+                adicione labels, notas e tags no Chatwoot automaticamente conforme o onboarding avança.
+            </div>
+        </div>
+
+        <!-- ====== WEBHOOKS ====== -->
+        <div id="webhooks" class="tab-content">
+            <div class="section-title">Webhooks & Integrações</div>
+
+            <div class="table-card">
+                <div class="table-name">Chatwoot → N8N</div>
+                <div class="table-purpose">Toda mensagem nova no WhatsApp chega aqui</div>
+                <div class="webhook-box">
+                    <span class="comment">// Configurar em: Chatwoot → Settings → Integrations → Webhooks</span><br>
+                    <span class="method">POST</span> <span
+                        class="url">https://seu-n8n.com/webhook/chatwoot-incoming</span><br><br>
+                    <span class="comment">// Eventos recomendados:</span><br>
+                    message_created<br>
+                    conversation_status_changed<br>
+                    contact_created
+                </div>
+                <div class="note" style="margin-top:12px;">
+                    <strong>Dica:</strong> No N8N, filtre pelo <code>event</code> e <code>message_type = incoming</code>
+                    pra ignorar mensagens enviadas pelo próprio bot.
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-name">Typebot → N8N</div>
+                <div class="table-purpose">Dados coletados no fluxo conversacional</div>
+                <div class="webhook-box">
+                    <span class="comment">// No Typebot: use o bloco "Webhook" no final do fluxo</span><br>
+                    <span class="method">POST</span> <span
+                        class="url">https://seu-n8n.com/webhook/typebot-onboarding-complete</span><br><br>
+                    <span class="comment">// Payload exemplo:</span><br>
+                    {<br>
+                    &nbsp;&nbsp;"phone": "+5511999999999",<br>
+                    &nbsp;&nbsp;"first_name": "João",<br>
+                    &nbsp;&nbsp;"email": "joao@email.com",<br>
+                    &nbsp;&nbsp;"wants_strava": true<br>
+                    }
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-name">Strava OAuth → N8N</div>
+                <div class="table-purpose">Callback após o usuário autorizar</div>
+                <div class="webhook-box">
+                    <span class="comment">// Configurar como redirect_uri no Strava App</span><br>
+                    <span class="method">GET</span> <span
+                        class="url">https://seu-n8n.com/webhook/strava-callback?code=XXX&state={user_id}</span><br><br>
+                    <span class="comment">// N8N então faz POST pra trocar o code:</span><br>
+                    <span class="method">POST</span> <span class="url">https://www.strava.com/oauth/token</span><br>
+                    {<br>
+                    &nbsp;&nbsp;"client_id": "...",<br>
+                    &nbsp;&nbsp;"client_secret": "...",<br>
+                    &nbsp;&nbsp;"code": "XXX",<br>
+                    &nbsp;&nbsp;"grant_type": "authorization_code"<br>
+                    }
+                </div>
+                <div class="note" style="margin-top:12px;">
+                    <strong>⚠️ Importante:</strong> Após trocar o code, redirecione o usuário pra uma página de sucesso
+                    (pode ser uma página simples dizendo "Pode voltar pro WhatsApp!"). O N8N cuida de avisar o usuário
+                    pelo WhatsApp automaticamente.
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-name">Strava Push → N8N</div>
+                <div class="table-purpose">Webhook de novas atividades (pós-onboarding)</div>
+                <div class="webhook-box">
+                    <span class="comment">// Registrar uma única vez via Strava API</span><br>
+                    <span class="method">POST</span> <span
+                        class="url">https://www.strava.com/api/v3/push_subscriptions</span><br>
+                    {<br>
+                    &nbsp;&nbsp;"callback_url": "https://seu-n8n.com/webhook/strava-activity",<br>
+                    &nbsp;&nbsp;"verify_token": "seu-token-secreto"<br>
+                    }<br><br>
+                    <span class="comment">// Strava manda a cada atividade nova:</span><br>
+                    {<br>
+                    &nbsp;&nbsp;"object_type": "activity",<br>
+                    &nbsp;&nbsp;"aspect_type": "create",<br>
+                    &nbsp;&nbsp;"object_id": 12345678,<br>
+                    &nbsp;&nbsp;"owner_id": 98765 <span class="comment">// strava_athlete_id</span><br>
+                    }
+                </div>
+                <div class="note" style="margin-top:12px;">
+                    <strong>Fluxo no N8N:</strong> Recebe push → busca <code>owner_id</code> na tabela
+                    <code>strava_connections</code> → puxa detalhes da atividade via API → salva em
+                    <code>activities</code> → gera insight → envia pelo WhatsApp via Evolution API.
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-name">N8N → Evolution API</div>
+                <div class="table-purpose">Envio de mensagens para o usuário</div>
+                <div class="webhook-box">
+                    <span class="comment">// Para enviar mensagens fora do Typebot (insights, follow-ups)</span><br>
+                    <span class="method">POST</span> <span
+                        class="url">https://sua-evolution.com/message/sendText/{instance}</span><br>
+                    {<br>
+                    &nbsp;&nbsp;"number": "+5511999999999",<br>
+                    &nbsp;&nbsp;"text": "Sua corrida de hoje foi incrível! 🏃 5.2km em 26min..."<br>
+                    }
+                </div>
+            </div>
+
+            <div class="table-card" style="margin-top: 8px;">
+                <div class="table-name" style="color:#ea4b71;">Resumo dos Workflows N8N</div>
+                <div class="table-purpose">Os 6 workflows que você vai precisar criar</div>
+                <div class="fields">
+                    <div class="field" style="border-bottom: 1px solid #1a1a26; padding-bottom:10px;">
+                        <span class="field-name" style="color:#ea4b71; min-width:260px;">1. Onboarding Router</span>
+                        <span class="field-desc">Trigger: webhook Chatwoot → decide fluxo baseado no status do
+                            user</span>
+                    </div>
+                    <div class="field" style="border-bottom: 1px solid #1a1a26; padding-bottom:10px;">
+                        <span class="field-name" style="color:#ea4b71; min-width:260px;">2. Typebot Data Handler</span>
+                        <span class="field-desc">Trigger: webhook Typebot → salva dados → envia link Strava</span>
+                    </div>
+                    <div class="field" style="border-bottom: 1px solid #1a1a26; padding-bottom:10px;">
+                        <span class="field-name" style="color:#ea4b71; min-width:260px;">3. Strava OAuth Callback</span>
+                        <span class="field-desc">Trigger: GET webhook → troca code por tokens → salva → notifica</span>
+                    </div>
+                    <div class="field" style="border-bottom: 1px solid #1a1a26; padding-bottom:10px;">
+                        <span class="field-name" style="color:#ea4b71; min-width:260px;">4. Strava Activity
+                            Processor</span>
+                        <span class="field-desc">Trigger: webhook push → busca detalhes → salva → gera insight →
+                            envia</span>
+                    </div>
+                    <div class="field" style="border-bottom: 1px solid #1a1a26; padding-bottom:10px;">
+                        <span class="field-name" style="color:#ea4b71; min-width:260px;">5. Follow-up Scheduler</span>
+                        <span class="field-desc">Trigger: Schedule (diário) → lembra users com onboarding
+                            incompleto</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-name" style="color:#ea4b71; min-width:260px;">6. Weekly Summary
+                            Generator</span>
+                        <span class="field-desc">Trigger: Schedule (semanal) → agrega atividades → gera resumo →
+                            envia</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+
+</html>
