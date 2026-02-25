@@ -213,6 +213,15 @@ export default function Landing() {
                   Começar no WhatsApp
                 </a>
                 <a
+                  href="/login"
+                  className="bg-accent hover:bg-accent-600 text-bark px-8 py-4 rounded-full font-display font-bold text-lg shadow-xl shadow-accent/25 hover:shadow-2xl hover:shadow-accent/30 transition-all hover:-translate-y-0.5"
+                >
+                  Área de Membros
+                </a>
+              </div>
+
+              <div className="mt-4 flex justify-center lg:justify-start">
+                <a
                   href="#how"
                   className="text-primary font-body font-semibold flex items-center gap-1 hover:gap-2 transition-all"
                 >
