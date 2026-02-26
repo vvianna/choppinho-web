@@ -15,6 +15,14 @@ interface RequestBody {
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
+    // Debug: Log environment variables (sem expor valores sensíveis)
+    console.log('Environment check:', {
+      hasSupabaseUrl: !!context.env.SUPABASE_URL,
+      hasServiceRoleKey: !!context.env.SUPABASE_SERVICE_ROLE_KEY,
+      hasWebhookUrl: !!context.env.N8N_WEBHOOK_MAGIC_LINK,
+      supabaseUrlPrefix: context.env.SUPABASE_URL?.substring(0, 20) || 'undefined',
+    });
+
     // Parse body
     const body = await context.request.json() as RequestBody;
     const { phone_number } = body;
@@ -27,8 +35,17 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     // Verificar se variáveis de ambiente existem
     if (!context.env.SUPABASE_URL || !context.env.SUPABASE_SERVICE_ROLE_KEY) {
-      console.error('Missing environment variables');
-      return errorResponse('Configuração do servidor incompleta. Contate o administrador.', 500);
+      console.error('Missing environment variables:', {
+        SUPABASE_URL: !!context.env.SUPABASE_URL,
+        SUPABASE_SERVICE_ROLE_KEY: !!context.env.SUPABASE_SERVICE_ROLE_KEY,
+        N8N_WEBHOOK_MAGIC_LINK: !!context.env.N8N_WEBHOOK_MAGIC_LINK,
+      });
+      return errorResponse(
+        `Configuração do servidor incompleta. ` +
+        `SUPABASE_URL: ${!!context.env.SUPABASE_URL}, ` +
+        `SERVICE_KEY: ${!!context.env.SUPABASE_SERVICE_ROLE_KEY}`,
+        500
+      );
     }
 
     // Conectar ao Supabase
