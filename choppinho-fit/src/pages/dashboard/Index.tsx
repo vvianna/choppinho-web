@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getAuthHeaders, clearSession } from "../../lib/auth";
+import WeeklyEvolutionChart from "../../components/dashboard/WeeklyEvolutionChart";
+import WeekdayDistributionChart from "../../components/dashboard/WeekdayDistributionChart";
 
 interface DashboardStats {
   connected: boolean;
@@ -21,6 +23,7 @@ interface DashboardStats {
   avg_heartrate?: number;
   total_calories?: number;
   recent_activities?: any[];
+  weekly_evolution?: any[];
 }
 
 export default function Dashboard() {
@@ -198,23 +201,26 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Gráfico de Evolução (placeholder) */}
+            {/* Gráfico de Evolução Semanal */}
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-primary/10 mb-8">
               <div className="flex items-center gap-3 mb-6">
-                <BarChart3 size={24} className="text-primary" />
+                <TrendingUp size={24} className="text-primary" />
                 <h2 className="font-display font-bold text-xl text-bark">
                   Evolução Semanal
                 </h2>
               </div>
+              <WeeklyEvolutionChart data={stats.weekly_evolution || []} />
+            </div>
 
-              <div className="bg-primary/5 rounded-xl h-64 flex items-center justify-center border-2 border-dashed border-primary/20">
-                <div className="text-center">
-                  <TrendingUp size={48} className="text-primary/30 mx-auto mb-3" />
-                  <p className="font-body text-bark/60">
-                    Gráfico será implementado com Recharts
-                  </p>
-                </div>
+            {/* Gráfico de Distribuição por Dia da Semana */}
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-primary/10 mb-8">
+              <div className="flex items-center gap-3 mb-6">
+                <BarChart3 size={24} className="text-primary" />
+                <h2 className="font-display font-bold text-xl text-bark">
+                  Distribuição de Treinos
+                </h2>
               </div>
+              <WeekdayDistributionChart activities={stats.recent_activities || []} />
             </div>
 
             {/* Lista de Atividades */}
