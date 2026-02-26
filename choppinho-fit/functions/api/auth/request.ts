@@ -47,8 +47,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const token = tokenData.token;
 
     // Montar magic link
-    const magicLink = `https://choppinho-web.pages.dev/auth/verify?token=${token}`;
-    // TODO: Em produção, usar a URL real do deploy
+    const origin = new URL(context.request.url).origin;
+    const magicLink = `${origin}/auth/verify?token=${token}`;
 
     // Chamar webhook N8N para enviar WhatsApp
     try {
