@@ -105,7 +105,7 @@ export default function Landing() {
           </a>
 
           {/* Desktop links */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-6">
             {navLinks.map((l) => (
               <a
                 key={l.href}
@@ -115,6 +115,13 @@ export default function Landing() {
                 {l.label}
               </a>
             ))}
+            <a
+              href="/login"
+              className="font-body font-semibold text-primary hover:text-primary-600 transition-colors text-sm flex items-center gap-1"
+            >
+              <Lock size={16} />
+              Área de Membros
+            </a>
             <a
               href="https://wa.me/5521967076547"
               className="bg-primary text-white px-5 py-2.5 rounded-full font-display font-bold text-sm hover:bg-primary-600 transition-colors shadow-lg shadow-primary/20"
@@ -146,6 +153,14 @@ export default function Landing() {
                 {l.label}
               </a>
             ))}
+            <a
+              href="/login"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-2 font-body font-semibold text-primary py-2"
+            >
+              <Lock size={18} />
+              Área de Membros
+            </a>
             <a
               href="https://wa.me/5521967076547"
               onClick={() => setMenuOpen(false)}
