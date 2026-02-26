@@ -41,28 +41,39 @@ export default function Login() {
 
     setLoading(true);
 
-    // 🎭 MOCK: Simula envio do magic link
-    setTimeout(() => {
+    try {
+      // Formatar número completo com +55
+      const fullPhone = "+55" + phoneNumber.replace(/\D/g, "");
+
+      // Chamar API real
+      const response = await fetch("/api/auth/request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phone_number: fullPhone,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        alert(data.error || "Erro ao enviar magic link. Tente novamente.");
+        setLoading(false);
+        return;
+      }
+
+      // Sucesso: mostrar tela de "link enviado"
       setLoading(false);
       setStep("sent");
-    }, 1500);
+    } catch (error) {
+      console.error("Error requesting magic link:", error);
+      alert("Erro ao conectar com servidor. Tente novamente.");
+      setLoading(false);
+    }
   };
 
-  const handleMockLogin = () => {
-    // 🎭 MOCK: Simula clique no magic link
-    // Na versão real, isso vem do WhatsApp
-    const mockToken = "mock-token-" + Date.now();
-
-    // Formata o número completo com +55
-    const fullPhone = "+55" + phoneNumber.replace(/\D/g, "");
-
-    // Salva token fake no localStorage (simula sessão)
-    localStorage.setItem("choppinho_session_token", mockToken);
-    localStorage.setItem("choppinho_user_phone", fullPhone);
-
-    // Redireciona para dashboard
-    navigate("/dashboard");
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-cream to-primary/10 flex items-center justify-center px-4">
@@ -157,21 +168,12 @@ export default function Login() {
                 </p>
               </div>
 
-              <div className="bg-accent/10 border border-accent/20 rounded-xl p-4">
+              <div className="bg-primary/10 border border-primary/20 rounded-xl p-4">
                 <p className="text-sm text-bark/80 font-body">
-                  ⚠️ <strong>MODO DEMO:</strong> Este é um mock para testar a
-                  UI. Clique no botão abaixo para simular o acesso via magic
-                  link.
+                  ⏰ O link expira em <strong>15 minutos</strong>. Se não
+                  receber, tente novamente.
                 </p>
               </div>
-
-              {/* 🎭 MOCK: Botão para simular clique no magic link */}
-              <button
-                onClick={handleMockLogin}
-                className="w-full bg-accent hover:bg-accent-600 text-bark px-6 py-4 rounded-xl font-display font-bold text-lg transition-colors shadow-lg shadow-accent/20"
-              >
-                🎭 Simular Magic Link (Demo)
-              </button>
 
               <button
                 onClick={() => setStep("input")}

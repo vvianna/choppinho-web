@@ -24,7 +24,8 @@ ALTER TABLE choppinho.users
   ADD COLUMN IF NOT EXISTS subscription_plan TEXT DEFAULT 'free',
   ADD COLUMN IF NOT EXISTS subscription_status TEXT DEFAULT 'active',
   ADD COLUMN IF NOT EXISTS subscription_started_at TIMESTAMPTZ,
-  ADD COLUMN IF NOT EXISTS subscription_expires_at TIMESTAMPTZ;
+  ADD COLUMN IF NOT EXISTS subscription_expires_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS personality_mode TEXT DEFAULT 'default';
 
 -- Index para busca rápida por telefone (usado no magic link)
 CREATE INDEX IF NOT EXISTS idx_users_phone_number
@@ -206,6 +207,7 @@ Após executar todos os comandos, você deve ver:
 4. ✅ **Vários indexes** criados (idx_users_phone_number, idx_auth_tokens_token, etc.)
 5. ✅ **Função `cleanup_expired_tokens()`** criada
 6. ✅ **View `user_stats_weekly`** criada
+7. ✅ **Campo `personality_mode`** adicionado em `users`
 
 ---
 

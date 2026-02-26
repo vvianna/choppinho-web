@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { setSessionToken } from "../lib/auth";
 
 export default function AuthVerify() {
   const [searchParams] = useSearchParams();
@@ -16,19 +17,33 @@ export default function AuthVerify() {
       return;
     }
 
-    // 🎭 MOCK: Simula validação do token
-    // Na versão real, chama: GET /api/auth/verify?token=xxx
-    setTimeout(() => {
-      // Salva sessão fake
-      localStorage.setItem("choppinho_session_token", token);
+    // Verificar token via API
+    const verifyToken = async () => {
+      try {
+        const response = await fetch(`/api/auth/verify?token=${token}`);
+        const data = await response.json();
 
-      setStatus("success");
+        if (!response.ok || !data.success) {
+          setStatus("error");
+          return;
+        }
 
-      // Redireciona para dashboard após 1.5s
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 1500);
-    }, 1500);
+        // Salvar session token no localStorage
+        setSessionToken(data.session_token);
+
+        setStatus("success");
+
+        // Redirecionar para dashboard após 1.5s
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 1500);
+      } catch (error) {
+        console.error("Error verifying token:", error);
+        setStatus("error");
+      }
+    };
+
+    verifyToken();
   }, [searchParams, navigate]);
 
   return (

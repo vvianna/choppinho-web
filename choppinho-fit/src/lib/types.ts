@@ -20,6 +20,7 @@ export interface User {
   subscription_status: 'active' | 'canceled' | 'expired';
   subscription_started_at: string | null;
   subscription_expires_at: string | null;
+  personality_mode: 'default' | 'offensive' | 'light_zen';
 }
 
 export interface StravaConnection {
