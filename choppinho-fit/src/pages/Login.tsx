@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { MessageCircle, Smartphone } from "lucide-react";
 
 export default function Login() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<"input" | "sent">("input");
-  const navigate = useNavigate();
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Remove tudo que não é número
