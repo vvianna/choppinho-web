@@ -25,8 +25,20 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return errorResponse('Número de telefone inválido. Use formato: +5521967076547', 400);
     }
 
+    // Verificar se variáveis de ambiente existem
+    if (!context.env.SUPABASE_URL || !context.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('Missing environment variables');
+      return errorResponse('Configuração do servidor incompleta. Contate o administrador.', 500);
+    }
+
     // Conectar ao Supabase
-    const supabase = getSupabaseClient(context.env);
+    let supabase;
+    try {
+      supabase = getSupabaseClient(context.env);
+    } catch (err) {
+      console.error('Error creating Supabase client:', err);
+      return errorResponse('Erro ao conectar com banco de dados', 500);
+    }
 
     // Gerar token UUID e salvar em auth_tokens
     const { data: tokenData, error: tokenError } = await supabase
@@ -41,7 +53,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     if (tokenError || !tokenData) {
       console.error('Error creating auth token:', tokenError);
-      return errorResponse('Erro ao gerar token de autenticação', 500);
+      console.error('Token error details:', JSON.stringify(tokenError));
+      return errorResponse(`Erro ao gerar token: ${tokenError?.message || 'Desconhecido'}`, 500);
     }
 
     const token = tokenData.token;
