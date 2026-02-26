@@ -8,11 +8,34 @@ export default function Login() {
   const [step, setStep] = useState<"input" | "sent">("input");
   const navigate = useNavigate();
 
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Remove tudo que não é número
+    let value = e.target.value.replace(/\D/g, "");
+
+    // Limita a 11 dígitos (DDD + número)
+    if (value.length > 11) {
+      value = value.slice(0, 11);
+    }
+
+    // Formata: (21) 96707-6547
+    if (value.length > 0) {
+      if (value.length <= 2) {
+        value = `(${value}`;
+      } else if (value.length <= 7) {
+        value = `(${value.slice(0, 2)}) ${value.slice(2)}`;
+      } else {
+        value = `(${value.slice(0, 2)}) ${value.slice(2, 7)}-${value.slice(7)}`;
+      }
+    }
+
+    setPhoneNumber(value);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!phoneNumber) {
-      alert("Por favor, digite seu número de telefone");
+    if (!phoneNumber || phoneNumber.replace(/\D/g, "").length < 10) {
+      alert("Por favor, digite um número de telefone válido");
       return;
     }
 
@@ -30,9 +53,12 @@ export default function Login() {
     // Na versão real, isso vem do WhatsApp
     const mockToken = "mock-token-" + Date.now();
 
+    // Formata o número completo com +55
+    const fullPhone = "+55" + phoneNumber.replace(/\D/g, "");
+
     // Salva token fake no localStorage (simula sessão)
     localStorage.setItem("choppinho_session_token", mockToken);
-    localStorage.setItem("choppinho_user_phone", phoneNumber);
+    localStorage.setItem("choppinho_user_phone", fullPhone);
 
     // Redireciona para dashboard
     navigate("/dashboard");
@@ -77,13 +103,17 @@ export default function Login() {
                     size={20}
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-bark/40"
                   />
+                  <span className="absolute left-12 top-1/2 -translate-y-1/2 text-bark font-body font-semibold">
+                    +55
+                  </span>
                   <input
                     id="phone"
                     type="tel"
-                    placeholder="+55 21 96707-6547"
+                    placeholder="(21) 96707-6547"
                     value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-primary/20 focus:border-primary focus:outline-none font-body transition-colors"
+                    onChange={handlePhoneChange}
+                    maxLength={15}
+                    className="w-full pl-20 pr-4 py-3 rounded-xl border-2 border-primary/20 focus:border-primary focus:outline-none font-body transition-colors"
                   />
                 </div>
                 <p className="text-sm text-bark/60 mt-2">
@@ -122,7 +152,7 @@ export default function Login() {
                 </h2>
                 <p className="font-body text-bark/70">
                   Enviamos um link de acesso para{" "}
-                  <strong className="text-primary">{phoneNumber}</strong> no
+                  <strong className="text-primary">+55 {phoneNumber}</strong> no
                   WhatsApp.
                 </p>
               </div>
