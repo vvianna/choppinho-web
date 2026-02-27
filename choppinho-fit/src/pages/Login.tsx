@@ -1,10 +1,15 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { MessageCircle, Smartphone } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { setSessionToken } from "../lib/auth";
 
 export default function Login() {
+  const navigate = useNavigate();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState<"input" | "sent">("input");
+  const [step, setStep] = useState<"input" | "pin">("input");
+  const [pinCode, setPinCode] = useState(["", "", "", "", "", ""]);
+  const pinRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Remove tudo que não é número
@@ -57,14 +62,16 @@ export default function Login() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        alert(data.error || "Erro ao enviar magic link. Tente novamente.");
+        alert(data.error || "Erro ao enviar código. Tente novamente.");
         setLoading(false);
         return;
       }
 
-      // Sucesso: mostrar tela de "link enviado"
+      // Sucesso: mostrar tela de PIN
       setLoading(false);
-      setStep("sent");
+      setStep("pin");
+      // Auto-focus no primeiro campo do PIN
+      setTimeout(() => pinRefs.current[0]?.focus(), 100);
     } catch (error) {
       console.error("Error requesting magic link:", error);
       alert("Erro ao conectar com servidor. Tente novamente.");
@@ -72,6 +79,89 @@ export default function Login() {
     }
   };
 
+  const handlePinChange = (index: number, value: string) => {
+    // Aceitar apenas números
+    if (value && !/^\d$/.test(value)) return;
+
+    const newPin = [...pinCode];
+    newPin[index] = value;
+    setPinCode(newPin);
+
+    // Auto-focus no próximo campo
+    if (value && index < 5) {
+      pinRefs.current[index + 1]?.focus();
+    }
+
+    // Se preencheu todos os 6, fazer submit automaticamente
+    if (index === 5 && value) {
+      const fullPin = [...newPin.slice(0, 5), value].join("");
+      handleVerifyPin(fullPin);
+    }
+  };
+
+  const handlePinKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && !pinCode[index] && index > 0) {
+      // Se está vazio e aperta backspace, volta pro anterior
+      pinRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handlePinPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pastedText = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+
+    if (pastedText.length === 6) {
+      const newPin = pastedText.split("");
+      setPinCode(newPin);
+      pinRefs.current[5]?.focus();
+      // Verificar automaticamente
+      handleVerifyPin(pastedText);
+    }
+  };
+
+  const handleVerifyPin = async (pin: string) => {
+    setLoading(true);
+
+    try {
+      const fullPhone = "+55" + phoneNumber.replace(/\D/g, "");
+
+      const response = await fetch("/api/auth/verify-pin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phone_number: fullPhone,
+          pin_code: pin,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        alert(data.error || "Código inválido ou expirado");
+        setPinCode(["", "", "", "", "", ""]);
+        pinRefs.current[0]?.focus();
+        setLoading(false);
+        return;
+      }
+
+      // Salvar session token
+      setSessionToken(data.session_token);
+
+      // Redirecionar para dashboard
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Error verifying PIN:", error);
+      alert("Erro ao validar código. Tente novamente.");
+      setLoading(false);
+    }
+  };
+
+  const handleResend = () => {
+    setPinCode(["", "", "", "", "", ""]);
+    setStep("input");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-cream to-primary/10 flex items-center justify-center px-4">
@@ -126,7 +216,7 @@ export default function Login() {
                   />
                 </div>
                 <p className="text-sm text-bark/60 mt-2">
-                  Enviaremos um link de acesso via WhatsApp
+                  Enviaremos um código de 6 dígitos via WhatsApp
                 </p>
               </div>
 
@@ -143,42 +233,73 @@ export default function Login() {
                 ) : (
                   <>
                     <MessageCircle size={20} />
-                    Enviar Link
+                    Enviar Código
                   </>
                 )}
               </button>
             </form>
           ) : (
-            // PASSO 2: Link enviado (mock)
-            <div className="space-y-6 text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-                <MessageCircle size={32} className="text-green-600" />
-              </div>
-
-              <div>
+            // PASSO 2: Digite o código PIN
+            <div className="space-y-6">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <MessageCircle size={32} className="text-primary" />
+                </div>
                 <h2 className="font-display font-bold text-xl text-bark mb-2">
-                  Link enviado! 📱
+                  Digite o código
                 </h2>
-                <p className="font-body text-bark/70">
-                  Enviamos um link de acesso para{" "}
-                  <strong className="text-primary">+55 {phoneNumber}</strong> no
-                  WhatsApp.
+                <p className="font-body text-bark/70 text-sm">
+                  Enviamos um código de 6 dígitos para{" "}
+                  <strong className="text-primary">+55 {phoneNumber}</strong>
                 </p>
               </div>
+
+              {/* Campos de PIN */}
+              <div className="flex gap-2 justify-center">
+                {pinCode.map((digit, index) => (
+                  <input
+                    key={index}
+                    ref={(el) => (pinRefs.current[index] = el)}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handlePinChange(index, e.target.value)}
+                    onKeyDown={(e) => handlePinKeyDown(index, e)}
+                    onPaste={index === 0 ? handlePinPaste : undefined}
+                    disabled={loading}
+                    className="w-12 h-14 text-center text-2xl font-bold border-2 border-primary/20 rounded-xl focus:border-primary focus:outline-none transition-colors disabled:bg-bark/5"
+                  />
+                ))}
+              </div>
+
+              {loading && (
+                <div className="flex items-center justify-center gap-2 text-primary">
+                  <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                  <span className="text-sm font-body">Verificando...</span>
+                </div>
+              )}
 
               <div className="bg-primary/10 border border-primary/20 rounded-xl p-4">
-                <p className="text-sm text-bark/80 font-body">
-                  ⏰ O link expira em <strong>15 minutos</strong>. Se não
-                  receber, tente novamente.
+                <p className="text-sm text-bark/80 font-body text-center">
+                  ⏰ O código expira em <strong>5 minutos</strong>
                 </p>
               </div>
 
-              <button
-                onClick={() => setStep("input")}
-                className="text-sm text-bark/60 hover:text-bark font-body underline"
-              >
-                Tentar outro número
-              </button>
+              <div className="space-y-3">
+                <button
+                  onClick={handleResend}
+                  className="w-full text-sm text-bark/60 hover:text-bark font-body underline"
+                >
+                  Não recebeu? Enviar novo código
+                </button>
+
+                <div className="text-center">
+                  <p className="text-xs text-bark/50 font-body mb-2">
+                    Ou clique no link enviado via WhatsApp
+                  </p>
+                </div>
+              </div>
             </div>
           )}
         </div>

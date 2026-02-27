@@ -57,15 +57,31 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return errorResponse('Erro ao conectar com banco de dados', 500);
     }
 
-    // Gerar token UUID e salvar em auth_tokens
+    // Gerar short token (6 caracteres alfanuméricos) e PIN (6 dígitos)
+    const generateShortToken = (length: number): string => {
+      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+      let result = '';
+      for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return result;
+    };
+
+    const shortToken = generateShortToken(6); // ex: a7k9m2
+    const pinCode = Math.floor(100000 + Math.random() * 900000).toString(); // 6 dígitos: 748392
+
+    // Calcular expires_at (5 minutos a partir de agora)
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+
     const { data: tokenData, error: tokenError } = await supabase
       .from('auth_tokens')
       .insert({
         phone_number,
-        // token é gerado automaticamente pelo DEFAULT gen_random_uuid()
-        // expires_at é gerado automaticamente (NOW() + 15 minutes)
+        token: shortToken,
+        pin_code: pinCode,
+        expires_at: expiresAt,
       })
-      .select('token')
+      .select('token, pin_code')
       .single();
 
     if (tokenError || !tokenData) {
@@ -75,10 +91,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     const token = tokenData.token;
+    const pin = tokenData.pin_code;
 
-    // Montar magic link
+    // Montar magic link curto
     const origin = new URL(context.request.url).origin;
-    const magicLink = `${origin}/auth/verify?token=${token}`;
+    const magicLink = `${origin}/auth?c=${token}`;
 
     // Chamar webhook N8N para enviar WhatsApp
     try {
@@ -92,6 +109,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         body: JSON.stringify({
           phone_number,
           token,
+          pin_code: pin,
           magic_link: magicLink,
         }),
       });

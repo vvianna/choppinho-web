@@ -1,11 +1,8 @@
 /**
- * GET /api/auth/verify?token=xxx
- * OU
- * GET /api/auth?c=xxx (query param 'c' para magic link curto)
+ * POST /api/auth/verify-pin
+ * Verifica código PIN de 6 dígitos e cria sessão
  *
- * Verifica token curto e cria sessão
- *
- * Recebe: Query param 'token' ou 'c' (short token de 6 chars)
+ * Recebe: { phone_number: "+5521967076547", pin_code: "748392" }
  * Retorna: { success: true, user: {...}, session_token: "..." }
  */
 
@@ -13,40 +10,51 @@ import { getSupabaseClient } from '../../shared/supabase';
 import { jsonResponse, errorResponse, type Env } from '../../_middleware';
 import type { User } from '../../shared/types';
 
-export const onRequestGet: PagesFunction<Env> = async (context) => {
-  try {
-    // Extrair token da query string (aceita 'token' ou 'c')
-    const url = new URL(context.request.url);
-    const token = url.searchParams.get('token') || url.searchParams.get('c');
+interface RequestBody {
+  phone_number: string;
+  pin_code: string;
+}
 
-    if (!token) {
-      return errorResponse('Token não fornecido', 400);
+export const onRequestPost: PagesFunction<Env> = async (context) => {
+  try {
+    // Parse body
+    const body = await context.request.json() as RequestBody;
+    const { phone_number, pin_code } = body;
+
+    // Validar formato
+    if (!phone_number || !pin_code) {
+      return errorResponse('Telefone e código PIN são obrigatórios', 400);
+    }
+
+    // Validar formato do PIN (6 dígitos)
+    if (!/^\d{6}$/.test(pin_code)) {
+      return errorResponse('Código PIN inválido. Deve conter 6 dígitos.', 400);
     }
 
     // Conectar ao Supabase
     const supabase = getSupabaseClient(context.env);
 
-    // Buscar token válido
+    // Buscar token válido pelo phone_number e pin_code
     const { data: authToken, error: tokenError } = await supabase
       .from('auth_tokens')
       .select('*')
-      .eq('token', token)
+      .eq('phone_number', phone_number)
+      .eq('pin_code', pin_code)
       .eq('used', false)
       .gt('expires_at', new Date().toISOString())
       .single();
 
     if (tokenError || !authToken) {
-      return errorResponse('Token inválido ou expirado', 401);
+      return errorResponse('Código inválido ou expirado', 401);
     }
 
     // Marcar token como usado
     await supabase
       .from('auth_tokens')
       .update({ used: true })
-      .eq('token', token);
+      .eq('id', authToken.id);
 
     // Buscar ou criar usuário
-    // Primeiro tenta buscar
     let { data: user, error: userError } = await supabase
       .from('users')
       .select('*')
@@ -105,7 +113,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     });
 
   } catch (error) {
-    console.error('Error in /api/auth/verify:', error);
+    console.error('Error in /api/auth/verify-pin:', error);
     return errorResponse('Erro interno do servidor', 500);
   }
 };

@@ -13,6 +13,7 @@ function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/auth/verify" element={<AuthVerify />} />
+        <Route path="/auth" element={<AuthVerify />} /> {/* Magic link curto */}
 
         {/* Protected routes */}
         <Route
