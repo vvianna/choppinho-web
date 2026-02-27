@@ -10,7 +10,8 @@ export default function AuthVerify() {
   );
 
   useEffect(() => {
-    const token = searchParams.get("token");
+    // Aceitar tanto 'token' (longo) quanto 'c' (curto - magic link)
+    const token = searchParams.get("token") || searchParams.get("c");
 
     if (!token) {
       setStatus("error");
@@ -20,7 +21,9 @@ export default function AuthVerify() {
     // Verificar token via API
     const verifyToken = async () => {
       try {
-        const response = await fetch(`/api/auth/verify?token=${token}`);
+        // Usar 'c' se foi esse o parâmetro recebido, senão usar 'token'
+        const paramName = searchParams.get("c") ? "c" : "token";
+        const response = await fetch(`/api/auth/verify?${paramName}=${token}`);
         const data = await response.json();
 
         if (!response.ok || !data.success) {
