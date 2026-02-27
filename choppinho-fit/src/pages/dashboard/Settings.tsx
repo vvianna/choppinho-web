@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Smile, Settings as SettingsIcon, LogOut, X } from "lucide-react";
+import { User, Smile, Settings as SettingsIcon, LogOut, X, Activity as ActivityIcon, CheckCircle, XCircle, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getAuthHeaders, clearSession } from "../../lib/auth";
 import type { User as UserType } from "../../lib/types";
@@ -24,9 +24,17 @@ export default function Settings() {
   const [newNickname, setNewNickname] = useState("");
   const [personalityMode, setPersonalityMode] = useState<"default" | "offensive" | "light_zen">("default");
 
-  // Buscar perfil do usuário
+  // Strava state
+  const [stravaConnected, setStravaConnected] = useState(false);
+  const [stravaAthleteId, setStravaAthleteId] = useState<number | null>(null);
+  const [stravaLastSync, setStravaLastSync] = useState<string | null>(null);
+  const [stravaTotalActivities, setStravaTotalActivities] = useState(0);
+  const [syncing, setSyncing] = useState(false);
+
+  // Buscar perfil do usuário e status do Strava
   useEffect(() => {
     fetchProfile();
+    fetchStravaStatus();
   }, []);
 
   const fetchProfile = async () => {
@@ -126,6 +134,83 @@ export default function Settings() {
     if (confirm("Deseja realmente sair?")) {
       clearSession();
       navigate("/login");
+    }
+  };
+
+  const fetchStravaStatus = async () => {
+    try {
+      const response = await fetch("/api/strava/status", {
+        headers: getAuthHeaders(),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error("Erro ao buscar status do Strava");
+      }
+
+      setStravaConnected(data.data.connected);
+      setStravaAthleteId(data.data.athlete_id);
+      setStravaLastSync(data.data.last_sync);
+      setStravaTotalActivities(data.data.total_activities);
+    } catch (error) {
+      console.error("Error fetching Strava status:", error);
+      // Não mostrar toast aqui, apenas log
+    }
+  };
+
+  const handleSync = async () => {
+    if (!stravaConnected) {
+      setToast({ message: "Strava não está conectado", type: "error" });
+      return;
+    }
+
+    setSyncing(true);
+
+    try {
+      const response = await fetch("/api/strava/sync", {
+        method: "POST",
+        headers: getAuthHeaders(),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Erro ao sincronizar");
+      }
+
+      setToast({ message: "Sincronização concluída! ✅", type: "success" });
+      fetchStravaStatus(); // Recarregar status
+    } catch (error: any) {
+      console.error("Error syncing Strava:", error);
+      setToast({ message: error.message || "Erro ao sincronizar", type: "error" });
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  const handleDisconnect = async () => {
+    if (!confirm("Deseja realmente desconectar o Strava?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/strava/disconnect", {
+        method: "POST",
+        headers: getAuthHeaders(),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Erro ao desconectar");
+      }
+
+      setToast({ message: "Strava desconectado", type: "info" });
+      fetchStravaStatus(); // Recarregar status
+    } catch (error: any) {
+      console.error("Error disconnecting Strava:", error);
+      setToast({ message: error.message || "Erro ao desconectar", type: "error" });
     }
   };
 
@@ -361,6 +446,95 @@ export default function Settings() {
               </div>
             </label>
           </div>
+        </div>
+
+        {/* Strava */}
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-primary/10">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+              <ActivityIcon size={24} className="text-orange-600" />
+            </div>
+            <div>
+              <h2 className="font-display font-bold text-xl text-bark">
+                Strava
+              </h2>
+              <p className="text-sm text-bark/60">
+                Sincronize suas atividades automaticamente
+              </p>
+            </div>
+          </div>
+
+          {stravaConnected ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-green-600">
+                <CheckCircle size={20} />
+                <span className="font-body font-semibold">Conectado</span>
+              </div>
+
+              <div className="bg-bark/5 rounded-xl p-4 space-y-2 text-sm text-bark/70 font-body">
+                <div className="flex justify-between">
+                  <span>Atleta ID:</span>
+                  <span className="font-semibold text-bark">{stravaAthleteId}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Total de atividades:</span>
+                  <span className="font-semibold text-bark">{stravaTotalActivities}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Última sincronização:</span>
+                  <span className="font-semibold text-bark">
+                    {stravaLastSync
+                      ? new Date(stravaLastSync).toLocaleString("pt-BR", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "Nunca"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={handleSync}
+                  disabled={syncing}
+                  className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:bg-bark/20 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-body font-semibold transition-colors"
+                >
+                  <RefreshCw size={16} className={syncing ? "animate-spin" : ""} />
+                  {syncing ? "Sincronizando..." : "Sincronizar Agora"}
+                </button>
+
+                <button
+                  onClick={handleDisconnect}
+                  className="text-red-600 hover:text-red-700 font-body text-sm underline"
+                >
+                  Desconectar
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-bark/60">
+                <XCircle size={20} />
+                <span className="font-body">Strava não conectado</span>
+              </div>
+
+              <div className="bg-primary/10 border border-primary/20 rounded-xl p-4">
+                <p className="text-sm text-bark/80 font-body">
+                  Conecte sua conta Strava para sincronizar suas corridas automaticamente e visualizar suas estatísticas no dashboard.
+                </p>
+              </div>
+
+              <button
+                disabled
+                className="bg-bark/20 cursor-not-allowed text-bark/40 px-6 py-3 rounded-xl font-body font-semibold"
+              >
+                Conectar Strava (em breve)
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Botões de ação */}
