@@ -60,6 +60,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         user: {
           id: user.id,
           phone_number: user.phone_number,
+          first_name: user.first_name,
+          email: user.email,
           name: user.name,
           is_active: user.is_active,
           subscription_plan: user.subscription_plan,
@@ -67,6 +69,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           subscription_started_at: user.subscription_started_at,
           subscription_expires_at: user.subscription_expires_at,
           personality_mode: user.personality_mode,
+          nicknames: user.nicknames || [],
           last_login_at: user.last_login_at,
           created_at: user.created_at,
         },
