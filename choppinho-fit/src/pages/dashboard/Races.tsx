@@ -250,16 +250,16 @@ export default function Races() {
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between mb-8 gap-2">
+          <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
             <button
               onClick={() => navigate("/dashboard")}
-              className="text-bark/60 hover:text-bark transition-colors"
+              className="text-bark/60 hover:text-bark transition-colors flex-shrink-0"
             >
               <ArrowLeft size={24} />
             </button>
-            <div>
-              <h1 className="font-display font-bold text-3xl text-bark">
+            <div className="min-w-0">
+              <h1 className="font-display font-bold text-2xl sm:text-3xl text-bark truncate">
                 Provas Inscritas
               </h1>
               <p className="text-bark/60 font-body text-sm">
@@ -270,10 +270,11 @@ export default function Races() {
 
           <button
             onClick={() => handleOpenModal()}
-            className="flex items-center gap-2 bg-primary hover:bg-primary-600 text-white px-6 py-3 rounded-xl font-body font-semibold shadow-lg shadow-primary/20 transition-colors"
+            className="flex items-center gap-2 bg-primary hover:bg-primary-600 text-white px-4 sm:px-6 py-3 rounded-xl font-body font-semibold shadow-lg shadow-primary/20 transition-colors flex-shrink-0"
+            title="Adicionar Prova"
           >
             <Plus size={20} />
-            Adicionar Prova
+            <span className="hidden sm:inline">Adicionar Prova</span>
           </button>
         </div>
 
@@ -299,9 +300,9 @@ export default function Races() {
                   key={race.id}
                   className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-primary/10 hover:shadow-lg transition-shadow"
                 >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-start justify-between mb-4 gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-semibold ${getRaceTypeBadgeColor(
                             race.race_type
@@ -315,21 +316,23 @@ export default function Races() {
                           {statusBadge.label}
                         </span>
                       </div>
-                      <h3 className="font-display font-bold text-xl text-bark mb-1">
+                      <h3 className="font-display font-bold text-lg sm:text-xl text-bark mb-1 break-words">
                         {race.race_name}
                       </h3>
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-shrink-0">
                       <button
                         onClick={() => handleOpenModal(race)}
                         className="p-2 text-bark/60 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                        title="Editar"
                       >
                         <Edit size={18} />
                       </button>
                       <button
                         onClick={() => handleDelete(race.id, race.race_name)}
                         className="p-2 text-bark/60 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Excluir"
                       >
                         <Trash2 size={18} />
                       </button>

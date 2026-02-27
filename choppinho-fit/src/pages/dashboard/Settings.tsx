@@ -538,20 +538,22 @@ export default function Settings() {
         </div>
 
         {/* Botões de ação */}
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-4">
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 bg-primary hover:bg-primary-600 disabled:bg-bark/20 text-white px-6 py-4 rounded-xl font-display font-bold text-lg transition-colors shadow-lg shadow-primary/20"
+            className="flex-1 bg-primary hover:bg-primary-600 disabled:bg-bark/20 text-white px-6 py-4 rounded-xl font-display font-bold text-base sm:text-lg transition-colors shadow-lg shadow-primary/20"
           >
             {saving ? "Salvando..." : "Salvar Alterações"}
           </button>
 
           <button
             onClick={handleLogout}
-            className="bg-red-500 hover:bg-red-600 text-white px-6 py-4 rounded-xl font-display font-bold transition-colors"
+            className="bg-red-500 hover:bg-red-600 text-white px-6 py-4 rounded-xl font-display font-bold transition-colors flex items-center justify-center gap-2"
+            title="Sair"
           >
             <LogOut size={20} />
+            <span className="sm:hidden">Sair</span>
           </button>
         </div>
       </div>

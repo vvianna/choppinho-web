@@ -106,29 +106,32 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <button
               onClick={() => navigate("/dashboard/races")}
-              className="flex items-center gap-2 text-bark/60 hover:text-primary font-body text-sm transition-colors"
+              className="flex items-center gap-1 sm:gap-2 text-bark/60 hover:text-primary font-body text-sm transition-colors p-2 sm:p-0"
+              title="Provas"
             >
               <Trophy size={16} />
-              Provas
+              <span className="hidden sm:inline">Provas</span>
             </button>
 
             <button
               onClick={() => navigate("/dashboard/settings")}
-              className="flex items-center gap-2 text-bark/60 hover:text-primary font-body text-sm transition-colors"
+              className="flex items-center gap-1 sm:gap-2 text-bark/60 hover:text-primary font-body text-sm transition-colors p-2 sm:p-0"
+              title="Configurações"
             >
               <Settings size={16} />
-              Configurações
+              <span className="hidden sm:inline">Configurações</span>
             </button>
 
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 text-bark/60 hover:text-bark font-body text-sm transition-colors"
+              className="flex items-center gap-1 sm:gap-2 text-bark/60 hover:text-bark font-body text-sm transition-colors p-2 sm:p-0"
+              title="Sair"
             >
               <LogOut size={16} />
-              Sair
+              <span className="hidden sm:inline">Sair</span>
             </button>
           </div>
         </div>
