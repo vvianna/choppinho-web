@@ -21,6 +21,8 @@ export interface User {
   subscription_started_at: string | null;
   subscription_expires_at: string | null;
   personality_mode: 'default' | 'offensive' | 'light_zen';
+  // Fase 5: Apelidos
+  nicknames: string[]; // Lista de apelidos para personalização (ex: ["Monstro", "Fera"])
 }
 
 export interface StravaConnection {

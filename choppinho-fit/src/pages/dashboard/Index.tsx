@@ -6,6 +6,7 @@ import {
   Clock,
   LogOut,
   MapPin,
+  Settings,
   TrendingUp,
   Zap,
 } from "lucide-react";
@@ -104,13 +105,23 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 text-bark/60 hover:text-bark font-body text-sm transition-colors"
-          >
-            <LogOut size={16} />
-            Sair
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate("/dashboard/settings")}
+              className="flex items-center gap-2 text-bark/60 hover:text-primary font-body text-sm transition-colors"
+            >
+              <Settings size={16} />
+              Configurações
+            </button>
+
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 text-bark/60 hover:text-bark font-body text-sm transition-colors"
+            >
+              <LogOut size={16} />
+              Sair
+            </button>
+          </div>
         </div>
       </header>
 

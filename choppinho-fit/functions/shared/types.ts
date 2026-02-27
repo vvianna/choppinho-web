@@ -16,6 +16,7 @@ export interface User {
   subscription_started_at?: string;
   subscription_expires_at?: string;
   personality_mode: 'default' | 'offensive' | 'zen';
+  nicknames?: string[]; // Lista de apelidos para personalização (ex: ["Monstro", "Fera"])
 }
 
 export interface StravaConnection {
