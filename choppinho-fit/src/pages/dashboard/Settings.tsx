@@ -3,12 +3,19 @@ import { User, Smile, Settings as SettingsIcon, LogOut, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getAuthHeaders, clearSession } from "../../lib/auth";
 import type { User as UserType } from "../../lib/types";
+import Toast from "../../components/Toast";
+
+type ToastType = {
+  message: string;
+  type: "success" | "error" | "info";
+} | null;
 
 export default function Settings() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [user, setUser] = useState<UserType | null>(null);
+  const [toast, setToast] = useState<ToastType>(null);
 
   // Form state
   const [firstName, setFirstName] = useState("");
@@ -43,7 +50,7 @@ export default function Settings() {
       setLoading(false);
     } catch (error) {
       console.error("Error fetching profile:", error);
-      alert("Erro ao carregar perfil");
+      setToast({ message: "Erro ao carregar perfil", type: "error" });
       setLoading(false);
     }
   };
@@ -52,31 +59,33 @@ export default function Settings() {
     const trimmed = newNickname.trim();
 
     if (!trimmed) {
-      alert("Digite um apelido");
+      setToast({ message: "Digite um apelido", type: "error" });
       return;
     }
 
     if (trimmed.length > 30) {
-      alert("Apelido deve ter no máximo 30 caracteres");
+      setToast({ message: "Apelido deve ter no máximo 30 caracteres", type: "error" });
       return;
     }
 
     if (nicknames.length >= 10) {
-      alert("Máximo 10 apelidos permitidos");
+      setToast({ message: "Máximo 10 apelidos permitidos", type: "error" });
       return;
     }
 
     if (nicknames.includes(trimmed)) {
-      alert("Esse apelido já existe");
+      setToast({ message: "Esse apelido já existe", type: "info" });
       return;
     }
 
     setNicknames([...nicknames, trimmed]);
     setNewNickname("");
+    setToast({ message: "Apelido adicionado!", type: "success" });
   };
 
   const handleRemoveNickname = (index: number) => {
     setNicknames(nicknames.filter((_, i) => i !== index));
+    setToast({ message: "Apelido removido", type: "info" });
   };
 
   const handleSave = async () => {
@@ -103,11 +112,11 @@ export default function Settings() {
         throw new Error(data.error || "Erro ao salvar");
       }
 
-      alert("Perfil atualizado com sucesso! ✅");
+      setToast({ message: "Perfil atualizado com sucesso! ✅", type: "success" });
       fetchProfile(); // Recarregar dados
     } catch (error: any) {
       console.error("Error saving profile:", error);
-      alert(error.message || "Erro ao salvar perfil");
+      setToast({ message: error.message || "Erro ao salvar perfil", type: "error" });
     } finally {
       setSaving(false);
     }
@@ -131,6 +140,15 @@ export default function Settings() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-cream to-primary/10 pb-12">
       <div className="grain-overlay" />
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
 
       {/* Header */}
       <div className="bg-white/90 backdrop-blur-sm border-b border-primary/10 sticky top-0 z-10">
