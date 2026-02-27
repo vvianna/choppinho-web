@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import AuthVerify from "./pages/AuthVerify";
 import Dashboard from "./pages/dashboard/Index";
 import Settings from "./pages/dashboard/Settings";
+import Races from "./pages/dashboard/Races";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -30,6 +31,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Settings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/races"
+          element={
+            <ProtectedRoute>
+              <Races />
             </ProtectedRoute>
           }
         />

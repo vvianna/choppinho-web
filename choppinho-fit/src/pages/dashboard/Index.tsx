@@ -7,6 +7,7 @@ import {
   LogOut,
   MapPin,
   Settings,
+  Trophy,
   TrendingUp,
   Zap,
 } from "lucide-react";
@@ -106,6 +107,14 @@ export default function Dashboard() {
           </div>
 
           <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate("/dashboard/races")}
+              className="flex items-center gap-2 text-bark/60 hover:text-primary font-body text-sm transition-colors"
+            >
+              <Trophy size={16} />
+              Provas
+            </button>
+
             <button
               onClick={() => navigate("/dashboard/settings")}
               className="flex items-center gap-2 text-bark/60 hover:text-primary font-body text-sm transition-colors"

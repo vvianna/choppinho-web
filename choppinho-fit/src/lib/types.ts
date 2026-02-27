@@ -181,3 +181,38 @@ export const formatPhoneNumber = (phone: string): string => {
   // Apenas retorna o número limpo se não conseguir formatar
   return `+${cleaned}`;
 };
+
+// ─────────────────────────────────────────────
+// FASE 7: Provas Inscritas
+// ─────────────────────────────────────────────
+
+export interface RaceRegistration {
+  id: string; // UUID
+  user_id: string;
+  // Campos obrigatórios
+  race_name: string;
+  race_date: string; // ISO date string (YYYY-MM-DD)
+  distance: number; // KM
+  race_type: 'running' | 'triathlon' | 'ironman';
+  // Campos opcionais
+  location?: string | null;
+  registration_number?: string | null;
+  goal_time?: string | null; // HH:MM:SS
+  notes?: string | null;
+  status: 'upcoming' | 'completed' | 'cancelled';
+  result_time?: string | null; // HH:MM:SS
+  result_position?: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RaceFormData {
+  race_type: 'running' | 'triathlon' | 'ironman';
+  race_name: string;
+  race_date: string;
+  distance: number;
+  location?: string;
+  registration_number?: string;
+  goal_time?: string;
+  notes?: string;
+}
