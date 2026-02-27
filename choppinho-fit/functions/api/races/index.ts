@@ -6,14 +6,8 @@
  * DELETE /api/races - Remove prova
  */
 
-import { createClient } from "../../../choppinho-fit/src/lib/supabase";
-import { extractSessionToken } from "../../shared/auth";
-import { jsonResponse, errorResponse } from "../../shared/utils";
-
-interface Env {
-  SUPABASE_URL: string;
-  SUPABASE_ANON_KEY: string;
-}
+import { getSupabaseClient } from "../../shared/supabase";
+import { jsonResponse, errorResponse, extractSessionToken, type Env } from "../../_middleware";
 
 interface RaceRegistration {
   id?: string;
@@ -34,10 +28,7 @@ interface RaceRegistration {
 // GET /api/races - Lista todas as provas do usuário
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
-    const supabase = createClient(
-      context.env.SUPABASE_URL,
-      context.env.SUPABASE_ANON_KEY
-    );
+    const supabase = getSupabaseClient(context.env);
 
     // Validar sessão
     const sessionToken = extractSessionToken(context.request);
@@ -45,14 +36,14 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       return errorResponse("Não autenticado", 401);
     }
 
-    const { data: session } = await supabase
-      .from("sessions")
-      .select("user_id")
-      .eq("session_token", sessionToken)
-      .eq("is_valid", true)
+    // Buscar usuário pela sessão
+    const { data: user, error: userError } = await supabase
+      .from("users")
+      .select("id")
+      .eq("web_session_token", sessionToken)
       .single();
 
-    if (!session) {
+    if (userError || !user) {
       return errorResponse("Sessão inválida", 401);
     }
 
@@ -60,7 +51,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     const { data: races, error } = await supabase
       .from("race_registrations")
       .select("*")
-      .eq("user_id", session.user_id)
+      .eq("user_id", user.id)
       .order("race_date", { ascending: true });
 
     if (error) {
@@ -83,10 +74,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 // POST /api/races - Cria nova prova
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
-    const supabase = createClient(
-      context.env.SUPABASE_URL,
-      context.env.SUPABASE_ANON_KEY
-    );
+    const supabase = getSupabaseClient(context.env);
 
     // Validar sessão
     const sessionToken = extractSessionToken(context.request);
@@ -94,14 +82,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return errorResponse("Não autenticado", 401);
     }
 
-    const { data: session } = await supabase
-      .from("sessions")
-      .select("user_id")
-      .eq("session_token", sessionToken)
-      .eq("is_valid", true)
+    // Buscar usuário pela sessão
+    const { data: user, error: userError } = await supabase
+      .from("users")
+      .select("id")
+      .eq("web_session_token", sessionToken)
       .single();
 
-    if (!session) {
+    if (userError || !user) {
       return errorResponse("Sessão inválida", 401);
     }
 
@@ -135,7 +123,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const { data: newRace, error } = await supabase
       .from("race_registrations")
       .insert({
-        user_id: session.user_id,
+        user_id: user.id,
         race_name: body.race_name.trim(),
         race_date: body.race_date,
         distance: body.distance,
@@ -170,10 +158,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 // PUT /api/races - Atualiza prova existente
 export const onRequestPut: PagesFunction<Env> = async (context) => {
   try {
-    const supabase = createClient(
-      context.env.SUPABASE_URL,
-      context.env.SUPABASE_ANON_KEY
-    );
+    const supabase = getSupabaseClient(context.env);
 
     // Validar sessão
     const sessionToken = extractSessionToken(context.request);
@@ -181,14 +166,14 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       return errorResponse("Não autenticado", 401);
     }
 
-    const { data: session } = await supabase
-      .from("sessions")
-      .select("user_id")
-      .eq("session_token", sessionToken)
-      .eq("is_valid", true)
+    // Buscar usuário pela sessão
+    const { data: user, error: userError } = await supabase
+      .from("users")
+      .select("id")
+      .eq("web_session_token", sessionToken)
       .single();
 
-    if (!session) {
+    if (userError || !user) {
       return errorResponse("Sessão inválida", 401);
     }
 
@@ -223,7 +208,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       .from("race_registrations")
       .select("id")
       .eq("id", body.id)
-      .eq("user_id", session.user_id)
+      .eq("user_id", user.id)
       .single();
 
     if (!existingRace) {
@@ -252,7 +237,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       .from("race_registrations")
       .update(updateData)
       .eq("id", body.id)
-      .eq("user_id", session.user_id)
+      .eq("user_id", user.id)
       .select()
       .single();
 
@@ -275,10 +260,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
 // DELETE /api/races - Remove prova
 export const onRequestDelete: PagesFunction<Env> = async (context) => {
   try {
-    const supabase = createClient(
-      context.env.SUPABASE_URL,
-      context.env.SUPABASE_ANON_KEY
-    );
+    const supabase = getSupabaseClient(context.env);
 
     // Validar sessão
     const sessionToken = extractSessionToken(context.request);
@@ -286,14 +268,14 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
       return errorResponse("Não autenticado", 401);
     }
 
-    const { data: session } = await supabase
-      .from("sessions")
-      .select("user_id")
-      .eq("session_token", sessionToken)
-      .eq("is_valid", true)
+    // Buscar usuário pela sessão
+    const { data: user, error: userError } = await supabase
+      .from("users")
+      .select("id")
+      .eq("web_session_token", sessionToken)
       .single();
 
-    if (!session) {
+    if (userError || !user) {
       return errorResponse("Sessão inválida", 401);
     }
 
@@ -310,7 +292,7 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
       .from("race_registrations")
       .delete()
       .eq("id", raceId)
-      .eq("user_id", session.user_id);
+      .eq("user_id", user.id);
 
     if (error) {
       console.error("Error deleting race:", error);
