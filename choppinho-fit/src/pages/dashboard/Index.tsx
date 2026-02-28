@@ -28,16 +28,21 @@ interface DashboardStats {
   weekly_evolution?: any[];
 }
 
+type PeriodType = "week" | "month";
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [period, setPeriod] = useState<PeriodType>("week");
 
   useEffect(() => {
     const fetchDashboard = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const response = await fetch("/api/stats/dashboard?period=week", {
+        const response = await fetch(`/api/stats/dashboard?period=${period}`, {
           headers: getAuthHeaders(),
         });
 
@@ -62,7 +67,7 @@ export default function Dashboard() {
     };
 
     fetchDashboard();
-  }, [navigate]);
+  }, [navigate, period]);
 
   const handleLogout = async () => {
     try {
@@ -139,6 +144,43 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        {/* Period Selector */}
+        {!loading && stats && stats.connected && (
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+            <div>
+              <h2 className="font-display font-bold text-2xl sm:text-3xl text-bark">
+                Resumo {period === "week" ? "Semanal" : "Mensal"}
+              </h2>
+              <p className="text-sm text-bark/60 font-body mt-1">
+                {period === "week" ? "Últimos 7 dias" : "Últimos 30 dias"}
+              </p>
+            </div>
+
+            <div className="flex gap-2 w-full sm:w-auto">
+              <button
+                onClick={() => setPeriod("week")}
+                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-body text-sm transition-all ${
+                  period === "week"
+                    ? "bg-primary text-white shadow-md"
+                    : "bg-white/80 text-bark/60 hover:bg-white hover:text-bark border border-primary/10"
+                }`}
+              >
+                Semana
+              </button>
+              <button
+                onClick={() => setPeriod("month")}
+                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-body text-sm transition-all ${
+                  period === "month"
+                    ? "bg-primary text-white shadow-md"
+                    : "bg-white/80 text-bark/60 hover:bg-white hover:text-bark border border-primary/10"
+                }`}
+              >
+                Mês
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Loading State */}
         {loading && (
           <div className="flex items-center justify-center py-12">
@@ -229,7 +271,7 @@ export default function Dashboard() {
               <div className="flex items-center gap-3 mb-6">
                 <TrendingUp size={24} className="text-primary" />
                 <h2 className="font-display font-bold text-xl text-bark">
-                  Evolução Semanal
+                  Evolução {period === "week" ? "Semanal" : "Mensal"}
                 </h2>
               </div>
               <WeeklyEvolutionChart data={stats.weekly_evolution || []} />
