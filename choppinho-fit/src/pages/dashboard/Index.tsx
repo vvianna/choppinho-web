@@ -266,12 +266,12 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Gráfico de Evolução Semanal */}
+            {/* Gráfico de Evolução de Volume */}
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-primary/10 mb-8">
               <div className="flex items-center gap-3 mb-6">
                 <TrendingUp size={24} className="text-primary" />
                 <h2 className="font-display font-bold text-xl text-bark">
-                  Evolução {period === "week" ? "Semanal" : "Mensal"}
+                  Evolução de Volume
                 </h2>
               </div>
               <WeeklyEvolutionChart data={stats.weekly_evolution || []} />
@@ -282,7 +282,7 @@ export default function Dashboard() {
               <div className="flex items-center gap-3 mb-6">
                 <BarChart3 size={24} className="text-primary" />
                 <h2 className="font-display font-bold text-xl text-bark">
-                  Distribuição de Treinos
+                  Distribuição Semanal de Treinos
                 </h2>
               </div>
               <WeekdayDistributionChart activities={stats.recent_activities || []} />
@@ -292,9 +292,14 @@ export default function Dashboard() {
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-primary/10">
               <div className="flex items-center gap-3 mb-6">
                 <Activity size={24} className="text-primary" />
-                <h2 className="font-display font-bold text-xl text-bark">
-                  Últimas Corridas
-                </h2>
+                <div>
+                  <h2 className="font-display font-bold text-xl text-bark">
+                    Corridas Consideradas
+                  </h2>
+                  <p className="text-xs text-bark/60 font-body mt-0.5">
+                    Atividades usadas no cálculo do período
+                  </p>
+                </div>
               </div>
 
               {stats.recent_activities && stats.recent_activities.length > 0 ? (

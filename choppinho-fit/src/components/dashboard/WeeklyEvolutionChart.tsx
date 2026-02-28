@@ -23,25 +23,22 @@ interface Props {
 }
 
 export default function WeeklyEvolutionChart({ data }: Props) {
-  // Formatar dados para o gráfico
-  const chartData = data
-    .slice(0, 4) // Últimas 4 semanas
-    .reverse() // Mais antiga para mais recente
-    .map((week, index) => {
-      const date = new Date(week.week_start);
-      const weekLabel = `S${index + 1}`;
+  // Formatar dados para o gráfico (dados já vêm ordenados do mais antigo pro mais recente)
+  const chartData = data.map((day) => {
+      const date = new Date(day.week_start);
+      const dayLabel = date.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "short",
+      });
 
       return {
-        name: weekLabel,
-        fullDate: date.toLocaleDateString("pt-BR", {
-          day: "2-digit",
-          month: "short",
-        }),
-        km: Number(week.total_km.toFixed(1)),
-        runs: week.total_runs,
+        name: dayLabel,
+        fullDate: dayLabel,
+        km: Number(day.total_km.toFixed(1)),
+        runs: day.total_runs,
         pace:
-          week.total_km > 0
-            ? ((week.total_moving_time_seconds / 60) / week.total_km).toFixed(2)
+          day.total_km > 0
+            ? ((day.total_moving_time_seconds / 60) / day.total_km).toFixed(2)
             : 0,
       };
     });
@@ -74,7 +71,11 @@ export default function WeeklyEvolutionChart({ data }: Props) {
         <XAxis
           dataKey="name"
           stroke="#6B7280"
-          style={{ fontSize: "12px", fontFamily: "Space Grotesk" }}
+          style={{ fontSize: "11px", fontFamily: "Space Grotesk" }}
+          interval="preserveStartEnd"
+          angle={-45}
+          textAnchor="end"
+          height={60}
         />
         <YAxis
           stroke="#6B7280"

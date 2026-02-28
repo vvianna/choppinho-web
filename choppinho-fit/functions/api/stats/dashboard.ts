@@ -118,8 +118,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     // Buscar últimas 10 atividades
     const recentActivities = activities.slice(0, 10);
 
-    // Calcular evolução semanal (últimas 4 semanas)
-    const weeklyEvolution = calculateWeeklyEvolution(activities);
+    // Calcular evolução diária
+    const dailyEvolution = calculateDailyEvolution(activities, daysAgo);
 
     return jsonResponse({
       success: true,
@@ -132,7 +132,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         avg_heartrate: avgHeartrate,
         total_calories: totalCalories,
         recent_activities: recentActivities,
-        weekly_evolution: weeklyEvolution,
+        weekly_evolution: dailyEvolution,
       },
     });
 
@@ -143,60 +143,67 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 };
 
 /**
- * Calcula evolução semanal (últimas 4 semanas)
+ * Calcula evolução diária (todos os dias do período)
  */
-function calculateWeeklyEvolution(activities: Activity[]) {
-  const weeks: Record<string, any> = {};
+function calculateDailyEvolution(activities: Activity[], daysAgo: number) {
+  // Criar um mapa de todos os dias do período
+  const dailyMap: Record<string, any> = {};
 
+  // Preencher com todos os dias (mesmo os sem atividade)
+  const today = new Date();
+  for (let i = 0; i < daysAgo; i++) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    date.setHours(0, 0, 0, 0);
+    const dateKey = date.toISOString().split('T')[0];
+
+    dailyMap[dateKey] = {
+      date: dateKey,
+      total_runs: 0,
+      total_km: 0,
+      total_moving_time_seconds: 0,
+      total_calories: 0,
+      avg_speed: 0,
+      avg_heartrate: 0,
+      heartrate_count: 0,
+    };
+  }
+
+  // Agregar atividades por dia
   activities.forEach(activity => {
     const date = new Date(activity.start_date);
-    // Calcular início da semana (segunda-feira)
-    const dayOfWeek = date.getDay();
-    const diff = date.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-    const weekStart = new Date(date.setDate(diff));
-    weekStart.setHours(0, 0, 0, 0);
-    const weekKey = weekStart.toISOString().split('T')[0];
+    date.setHours(0, 0, 0, 0);
+    const dateKey = date.toISOString().split('T')[0];
 
-    if (!weeks[weekKey]) {
-      weeks[weekKey] = {
-        week_start: weekKey,
-        total_runs: 0,
-        total_km: 0,
-        total_moving_time_seconds: 0,
-        total_calories: 0,
-        avg_speed: 0,
-        avg_heartrate: 0,
-        heartrate_count: 0,
-      };
-    }
+    if (dailyMap[dateKey]) {
+      dailyMap[dateKey].total_runs += 1;
+      dailyMap[dateKey].total_km += (activity.distance_meters || 0) / 1000;
+      dailyMap[dateKey].total_moving_time_seconds += activity.moving_time_seconds || 0;
+      dailyMap[dateKey].total_calories += activity.calories || 0;
+      dailyMap[dateKey].avg_speed += activity.average_speed || 0;
 
-    weeks[weekKey].total_runs += 1;
-    weeks[weekKey].total_km += (activity.distance_meters || 0) / 1000;
-    weeks[weekKey].total_moving_time_seconds += activity.moving_time_seconds || 0;
-    weeks[weekKey].total_calories += activity.calories || 0;
-    weeks[weekKey].avg_speed += activity.average_speed || 0;
-
-    if (activity.average_heartrate) {
-      weeks[weekKey].avg_heartrate += activity.average_heartrate;
-      weeks[weekKey].heartrate_count += 1;
+      if (activity.average_heartrate) {
+        dailyMap[dateKey].avg_heartrate += activity.average_heartrate;
+        dailyMap[dateKey].heartrate_count += 1;
+      }
     }
   });
 
-  // Calcular médias e formatar
-  const result = Object.values(weeks).map((week: any) => ({
-    week_start: week.week_start,
-    total_runs: week.total_runs,
-    total_km: Math.round(week.total_km * 100) / 100,
-    avg_speed: Math.round((week.avg_speed / week.total_runs) * 100) / 100,
-    avg_heartrate: week.heartrate_count > 0
-      ? Math.round(week.avg_heartrate / week.heartrate_count)
+  // Formatar resultado
+  const result = Object.values(dailyMap).map((day: any) => ({
+    week_start: day.date, // mantém o nome do campo para compatibilidade
+    total_runs: day.total_runs,
+    total_km: Math.round(day.total_km * 100) / 100,
+    avg_speed: day.total_runs > 0
+      ? Math.round((day.avg_speed / day.total_runs) * 100) / 100
+      : 0,
+    avg_heartrate: day.heartrate_count > 0
+      ? Math.round(day.avg_heartrate / day.heartrate_count)
       : null,
-    total_moving_time_seconds: week.total_moving_time_seconds,
-    total_calories: week.total_calories,
+    total_moving_time_seconds: day.total_moving_time_seconds,
+    total_calories: day.total_calories,
   }));
 
-  // Ordenar por data (mais recente primeiro) e limitar a 4 semanas
-  return result
-    .sort((a, b) => b.week_start.localeCompare(a.week_start))
-    .slice(0, 4);
+  // Ordenar por data (mais antiga primeiro para gráfico)
+  return result.sort((a, b) => a.week_start.localeCompare(b.week_start));
 }
