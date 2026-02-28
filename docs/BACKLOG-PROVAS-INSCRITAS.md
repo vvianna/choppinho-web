@@ -1,7 +1,9 @@
-# 📋 BACKLOG: Provas Inscritas (Race Registrations)
+# 📋 Provas Inscritas (Race Registrations)
 
-## 💡 Ideia
-Seção para o usuário registrar provas/corridas que está inscrito.
+**Status da Feature:** ✅ **IMPLEMENTADA na v1.0.0**
+
+## 🎯 Objetivo
+Permitir que o usuário cadastre provas/corridas em que está inscrito, defina metas e acompanhe resultados.
 
 ## 📊 Dados sugeridos
 
@@ -44,32 +46,64 @@ CREATE INDEX idx_race_registrations_user_date
 ON choppinho.race_registrations(user_id, race_date);
 ```
 
-## 🎯 Features
+## ✅ Features Implementadas (v1.0.0)
 
-1. **Lista de Provas**
+1. **Lista de Provas** ✅
    - Próximas provas (ordenadas por data)
    - Provas passadas
    - Contador: "Faltam X dias"
 
-2. **Adicionar Prova**
-   - Formulário com nome, data, distância, local
+2. **Adicionar Prova** ✅
+   - Formulário completo: nome, data, distância, local
    - Definir meta de tempo/pace
-   - Upload de comprovante de inscrição (opcional)
+   - Tipo de prova: Corrida / Triatlon / Ironman
+   - Número do peito (opcional)
+   - Notas pessoais
 
-3. **Detalhes da Prova**
+3. **Detalhes da Prova** ✅
    - Ver informações completas
-   - Editar meta
-   - Adicionar notas/estratégia
-   - Marcar como concluída
-   - Registrar resultado
+   - Editar prova
+   - Deletar prova
+   - Registrar resultado final (tempo, colocação)
 
-4. **Cards no Dashboard**
-   - "Próxima Prova" (countdown)
-   - "Última Prova Completada"
+4. **Endpoints API** ✅
+   - `GET /api/races` - Listar provas
+   - `POST /api/races` - Adicionar nova
+   - `PUT /api/races/:id` - Atualizar
+   - `DELETE /api/races/:id` - Deletar
 
-5. **Integração com Treinos**
-   - Sugerir plano de treino baseado na data da prova
-   - Mostrar se está no caminho para atingir a meta
+**Arquivos Implementados:**
+- [Races.tsx](../choppinho-fit/src/pages/dashboard/Races.tsx)
+- [CREATE-RACE-REGISTRATIONS.sql](migrations/CREATE-RACE-REGISTRATIONS.sql)
+- `/functions/api/races/*`
+
+---
+
+## 🚧 Melhorias Futuras (Backlog)
+
+### v1.1.0 - Card "Próxima Prova" no Dashboard
+- [ ] Adicionar widget no dashboard principal
+- [ ] Countdown destacado
+- [ ] Link direto para `/dashboard/races`
+
+**Referência:** [v1.1.0.md](versoes/v1.1.0.md)
+
+---
+
+### v1.2.0 - Features Avançadas
+
+#### Upload de Comprovante de Inscrição
+- [ ] Upload de foto/PDF
+- [ ] Storage no Supabase
+- [ ] Preview na tela de detalhes
+
+#### Integração com Treinos
+- [ ] Sugerir plano de treino baseado na data da prova
+- [ ] Mostrar progresso em direção à meta
+- [ ] Comparar pace atual vs objetivo
+- [ ] Alertas: "Faltam X semanas, você está no caminho!"
+
+**Referência:** [v1.2.0.md](versoes/v1.2.0.md)
 
 ## 🎨 UI Sugerida
 
@@ -88,15 +122,16 @@ ON choppinho.race_registrations(user_id, race_date);
 └─────────────────────────────────────┘
 ```
 
-## 🔗 Endpoints necessários
+---
 
-- `GET /api/races` - Listar provas do usuário
-- `POST /api/races` - Adicionar nova prova
-- `GET /api/races/:id` - Detalhes da prova
-- `PUT /api/races/:id` - Atualizar prova
-- `DELETE /api/races/:id` - Deletar prova
-- `POST /api/races/:id/complete` - Marcar como concluída + resultado
+## 📚 Links Relacionados
+
+- **Roadmap completo:** [ROADMAP.md](ROADMAP.md)
+- **v1.0.0 (implementada):** [versoes/v1.0.0.md](versoes/v1.0.0.md)
+- **v1.1.0 (próxima):** [versoes/v1.1.0.md](versoes/v1.1.0.md)
+- **v1.2.0 (melhorias):** [versoes/v1.2.0.md](versoes/v1.2.0.md)
 
 ---
 
-**Status:** 💡 Ideia registrada para implementação futura
+**Última atualização:** 27/02/2026
+**Feature implementada em:** v1.0.0 (Fevereiro 2026)
