@@ -5,7 +5,7 @@
  */
 
 import { ApiResponse, ActivityComparison } from '../../shared/types';
-import { createSupabaseClient } from '../../shared/supabase';
+import { getSupabaseClient } from '../../shared/supabase';
 
 interface CompareRequest {
   activity_ids: string[]; // IDs das atividades a comparar
@@ -56,7 +56,7 @@ export async function onRequestPost(context: any): Promise<Response> {
       );
     }
 
-    const supabase = createSupabaseClient(env);
+    const supabase = getSupabaseClient(env);
 
     // Buscar dados das atividades
     const { data: activities, error: activitiesError } = await supabase
@@ -140,7 +140,7 @@ export async function onRequestGet(context: any): Promise<Response> {
       );
     }
 
-    const supabase = createSupabaseClient(env);
+    const supabase = getSupabaseClient(env);
 
     // Buscar comparações da atividade
     const { data: comparisons, error } = await supabase

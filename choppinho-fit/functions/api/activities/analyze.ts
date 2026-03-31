@@ -4,7 +4,7 @@
  */
 
 import { ApiResponse, Activity } from '../../shared/types';
-import { createSupabaseClient } from '../../shared/supabase';
+import { getSupabaseClient } from '../../shared/supabase';
 
 interface AnalyzeRequest {
   activity_id: string;
@@ -35,7 +35,7 @@ export async function onRequestPost(context: any): Promise<Response> {
       );
     }
 
-    const supabase = createSupabaseClient(env);
+    const supabase = getSupabaseClient(env);
 
     // Verificar se o usuário tem acesso à atividade
     const { data: activity, error: activityError } = await supabase
