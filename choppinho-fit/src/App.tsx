@@ -1,10 +1,9 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import AuthVerify from "./pages/AuthVerify";
 import Dashboard from "./pages/dashboard/Index";
 import Settings from "./pages/dashboard/Settings";
-import Races from "./pages/dashboard/Races";
 import Training from "./pages/dashboard/Training";
 import TrainingForm from "./pages/dashboard/TrainingForm";
 import PlanView from "./pages/dashboard/PlanView";
@@ -39,11 +38,7 @@ function App() {
         />
         <Route
           path="/dashboard/races"
-          element={
-            <ProtectedRoute>
-              <Races />
-            </ProtectedRoute>
-          }
+          element={<Navigate to="/dashboard/treino" replace />}
         />
         <Route path="/dashboard/treino" element={<ProtectedRoute><Training /></ProtectedRoute>} />
         <Route path="/dashboard/treino/novo/:raceId?" element={<ProtectedRoute><TrainingForm /></ProtectedRoute>} />

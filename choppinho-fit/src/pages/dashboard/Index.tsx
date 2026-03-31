@@ -115,10 +115,10 @@ export default function Dashboard() {
             <button
               onClick={() => navigate("/dashboard/treino")}
               className="flex items-center gap-1 sm:gap-2 text-bark/60 hover:text-primary font-body text-sm transition-colors p-2 sm:p-0"
-              title="Provas & Treino"
+              title="Minhas Provas"
             >
               <Trophy size={16} />
-              <span className="hidden sm:inline">Provas &amp; Treino</span>
+              <span className="hidden sm:inline">Minhas Provas</span>
             </button>
 
             <button

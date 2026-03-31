@@ -10,10 +10,15 @@ import {
   ClipboardList,
   Eye,
   Edit,
+  Trash2,
+  X,
+  Hash,
+  Target,
+  Clock,
 } from "lucide-react";
 import { getAuthHeaders, clearSession } from "../../lib/auth";
 import { getTrainingPlans } from "../../lib/api";
-import { RaceRegistration, TrainingPlan } from "../../lib/types";
+import { RaceRegistration, TrainingPlan, RaceFormData } from "../../lib/types";
 import Toast from "../../components/Toast";
 
 type ToastType = { message: string; type: "success" | "error" | "info" } | null;
@@ -26,6 +31,21 @@ export default function Training() {
   const [races, setRaces] = useState<RaceRegistration[]>([]);
   const [plans, setPlans] = useState<TrainingPlan[]>([]);
   const [toast, setToast] = useState<ToastType>(null);
+
+  // Modal state
+  const [showModal, setShowModal] = useState(false);
+  const [editingRace, setEditingRace] = useState<RaceRegistration | null>(null);
+  const [formData, setFormData] = useState<RaceFormData>({
+    race_type: "running",
+    race_name: "",
+    race_date: "",
+    distance: 0,
+    location: "",
+    registration_number: "",
+    goal_time: "",
+    notes: "",
+  });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -63,6 +83,116 @@ export default function Training() {
       setToast({ message: err.message || "Erro ao carregar dados", type: "error" });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleOpenModal = (race?: RaceRegistration) => {
+    if (race) {
+      setEditingRace(race);
+      setFormData({
+        race_type: race.race_type,
+        race_name: race.race_name,
+        race_date: race.race_date,
+        distance: race.distance,
+        location: race.location || "",
+        registration_number: race.registration_number || "",
+        goal_time: race.goal_time || "",
+        notes: race.notes || "",
+      });
+    } else {
+      setEditingRace(null);
+      setFormData({
+        race_type: "running",
+        race_name: "",
+        race_date: "",
+        distance: 0,
+        location: "",
+        registration_number: "",
+        goal_time: "",
+        notes: "",
+      });
+    }
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setEditingRace(null);
+  };
+
+  const handleSave = async () => {
+    if (!formData.race_name.trim()) {
+      setToast({ message: "Nome da prova é obrigatório", type: "error" });
+      return;
+    }
+
+    if (!formData.race_date) {
+      setToast({ message: "Data da prova é obrigatória", type: "error" });
+      return;
+    }
+
+    if (!formData.distance || formData.distance <= 0) {
+      setToast({ message: "Distância deve ser maior que 0", type: "error" });
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const method = editingRace ? "PUT" : "POST";
+      const payload = editingRace
+        ? { id: editingRace.id, ...formData }
+        : formData;
+
+      const response = await fetch("/api/races", {
+        method,
+        headers: getAuthHeaders(),
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Erro ao salvar prova");
+      }
+
+      setToast({
+        message: editingRace ? "Prova atualizada! ✅" : "Prova criada! ✅",
+        type: "success",
+      });
+
+      handleCloseModal();
+      fetchData();
+    } catch (error: any) {
+      console.error("Error saving race:", error);
+      setToast({ message: error.message || "Erro ao salvar prova", type: "error" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (raceId: string, raceName: string) => {
+    if (!confirm(`Deseja realmente excluir "${raceName}"?`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/races?id=${raceId}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Erro ao excluir prova");
+      }
+
+      setToast({ message: "Prova excluída", type: "info" });
+      fetchData();
+    } catch (error: any) {
+      console.error("Error deleting race:", error);
+      setToast({ message: error.message || "Erro ao excluir prova", type: "error" });
     }
   };
 
@@ -156,7 +286,7 @@ export default function Training() {
               <h1 className="font-display font-bold text-xl text-primary">
                 Choppinho<span className="text-accent">Fit</span>
               </h1>
-              <p className="text-xs text-bark/60 font-body">Provas &amp; Treino</p>
+              <p className="text-xs text-bark/60 font-body">Minhas Provas</p>
             </div>
           </div>
 
@@ -172,11 +302,11 @@ export default function Training() {
 
             <button
               className="flex items-center gap-1 sm:gap-2 text-primary font-body text-sm font-semibold p-2 sm:p-0"
-              title="Provas & Treino"
+              title="Minhas Provas"
               aria-current="page"
             >
               <Trophy size={16} />
-              <span className="hidden sm:inline">Provas &amp; Treino</span>
+              <span className="hidden sm:inline">Minhas Provas</span>
             </button>
 
             <button
@@ -205,10 +335,10 @@ export default function Training() {
         {/* Page Title */}
         <div className="mb-8">
           <h2 className="font-display font-bold text-2xl sm:text-3xl text-bark">
-            Provas &amp; Treino
+            Minhas Provas
           </h2>
           <p className="text-bark/60 font-body text-sm mt-1">
-            Acompanhe suas provas inscritas e planos de treino
+            Suas provas e planos de treino personalizados
           </p>
         </div>
 
@@ -265,6 +395,15 @@ export default function Training() {
                         {race.race_name}
                       </h3>
                     </div>
+
+                    {/* Delete button */}
+                    <button
+                      onClick={() => handleDelete(race.id, race.race_name)}
+                      className="p-2 text-bark/60 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+                      title="Excluir prova"
+                    >
+                      <Trash2 size={18} />
+                    </button>
                   </div>
 
                   {/* Race details */}
@@ -279,7 +418,31 @@ export default function Training() {
                         <span>{race.location}</span>
                       </div>
                     )}
+                    {race.registration_number && (
+                      <div className="flex items-center gap-2">
+                        <Hash size={15} className="text-primary flex-shrink-0" />
+                        <span>{race.registration_number}</span>
+                      </div>
+                    )}
+                    {race.goal_time && (
+                      <div className="flex items-center gap-2">
+                        <Target size={15} className="text-primary flex-shrink-0" />
+                        <span>Meta: {race.goal_time}</span>
+                      </div>
+                    )}
+                    {race.result_time && (
+                      <div className="flex items-center gap-2">
+                        <Clock size={15} className="text-green-600 flex-shrink-0" />
+                        <span className="font-semibold text-green-600">{race.result_time}</span>
+                      </div>
+                    )}
                   </div>
+
+                  {race.notes && (
+                    <div className="mb-5 pt-3 border-t border-bark/10">
+                      <p className="text-sm text-bark/60 italic">{race.notes}</p>
+                    </div>
+                  )}
 
                   {/* Action buttons */}
                   <div className="flex flex-wrap gap-3">
@@ -306,7 +469,7 @@ export default function Training() {
                     )}
 
                     <button
-                      onClick={() => navigate("/dashboard/races")}
+                      onClick={() => handleOpenModal(race)}
                       className="flex items-center gap-2 bg-bark/5 hover:bg-bark/10 text-bark px-5 py-2.5 rounded-xl font-body font-semibold text-sm transition-colors border border-bark/10"
                     >
                       <Edit size={16} />
@@ -323,7 +486,7 @@ export default function Training() {
         {!loading && (
           <div className="mt-8 flex justify-center">
             <button
-              onClick={() => navigate("/dashboard/races")}
+              onClick={() => handleOpenModal()}
               className="flex items-center gap-2 bg-white/90 hover:bg-white border border-primary/20 text-primary px-6 py-3 rounded-xl font-body font-semibold transition-colors shadow-sm"
             >
               <Plus size={18} />
@@ -332,6 +495,200 @@ export default function Training() {
           </div>
         )}
       </main>
+
+      {/* Modal de Adicionar/Editar */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-bark/10 p-6 flex items-center justify-between">
+              <h2 className="font-display font-bold text-2xl text-bark">
+                {editingRace ? "Editar Prova" : "Adicionar Prova"}
+              </h2>
+              <button
+                onClick={handleCloseModal}
+                className="text-bark/60 hover:text-bark transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* DADOS OBRIGATÓRIOS */}
+              <div>
+                <h3 className="font-display font-bold text-lg text-bark mb-4 flex items-center gap-2">
+                  📋 Dados Obrigatórios
+                </h3>
+
+                {/* Tipo de Prova - PRIMEIRO */}
+                <div className="mb-4">
+                  <label className="block text-sm font-semibold text-bark mb-2">
+                    Tipo de Prova *
+                  </label>
+                  <select
+                    value={formData.race_type}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        race_type: e.target.value as "running" | "triathlon" | "ironman",
+                      })
+                    }
+                    className="w-full px-4 py-3 rounded-xl border border-bark/20 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors font-body"
+                  >
+                    <option value="running">🏃 Corrida</option>
+                    <option value="triathlon">🏊 Triatlon</option>
+                    <option value="ironman">💪 Ironman</option>
+                  </select>
+                </div>
+
+                {/* Nome da Prova */}
+                <div className="mb-4">
+                  <label className="block text-sm font-semibold text-bark mb-2">
+                    Nome da Prova *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.race_name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, race_name: e.target.value })
+                    }
+                    placeholder="Ex: Maratona do Rio 2026"
+                    className="w-full px-4 py-3 rounded-xl border border-bark/20 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors font-body"
+                  />
+                </div>
+
+                {/* Data e Distância */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-bark mb-2">
+                      Data *
+                    </label>
+                    <input
+                      type="date"
+                      value={formData.race_date}
+                      onChange={(e) =>
+                        setFormData({ ...formData, race_date: e.target.value })
+                      }
+                      className="w-full px-4 py-3 rounded-xl border border-bark/20 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors font-body"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-bark mb-2">
+                      Distância (km) *
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={formData.distance || ""}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          distance: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                      placeholder="Ex: 42.2"
+                      className="w-full px-4 py-3 rounded-xl border border-bark/20 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors font-body"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SEPARADOR */}
+              <div className="border-t border-bark/10"></div>
+
+              {/* DADOS OPCIONAIS */}
+              <div>
+                <h3 className="font-display font-bold text-lg text-bark mb-4 flex items-center gap-2">
+                  📝 Dados Opcionais
+                </h3>
+
+                {/* Local */}
+                <div className="mb-4">
+                  <label className="block text-sm font-semibold text-bark mb-2">
+                    Local
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.location}
+                    onChange={(e) =>
+                      setFormData({ ...formData, location: e.target.value })
+                    }
+                    placeholder="Ex: Rio de Janeiro, RJ"
+                    className="w-full px-4 py-3 rounded-xl border border-bark/20 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors font-body"
+                  />
+                </div>
+
+                {/* Nº de Peito e Tempo Objetivo */}
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-bark mb-2">
+                      Nº de Peito
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.registration_number}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          registration_number: e.target.value,
+                        })
+                      }
+                      placeholder="Ex: 1234"
+                      className="w-full px-4 py-3 rounded-xl border border-bark/20 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors font-body"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-bark mb-2">
+                      Tempo Objetivo
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.goal_time}
+                      onChange={(e) =>
+                        setFormData({ ...formData, goal_time: e.target.value })
+                      }
+                      placeholder="HH:MM:SS"
+                      className="w-full px-4 py-3 rounded-xl border border-bark/20 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors font-body"
+                    />
+                  </div>
+                </div>
+
+                {/* Observações */}
+                <div>
+                  <label className="block text-sm font-semibold text-bark mb-2">
+                    Observações
+                  </label>
+                  <textarea
+                    value={formData.notes}
+                    onChange={(e) =>
+                      setFormData({ ...formData, notes: e.target.value })
+                    }
+                    placeholder="Notas, estratégia, preparação..."
+                    rows={3}
+                    className="w-full px-4 py-3 rounded-xl border border-bark/20 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors font-body resize-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="sticky bottom-0 bg-white border-t border-bark/10 p-6 flex gap-4">
+              <button
+                onClick={handleCloseModal}
+                className="flex-1 px-6 py-3 rounded-xl font-body font-semibold text-bark bg-bark/5 hover:bg-bark/10 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="flex-1 px-6 py-3 rounded-xl font-body font-semibold text-white bg-primary hover:bg-primary-600 disabled:bg-bark/20 transition-colors shadow-lg shadow-primary/20"
+              >
+                {saving ? "Salvando..." : editingRace ? "Atualizar" : "Salvar Prova"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
