@@ -1,10 +1,12 @@
 import type { TrainingFormData } from '../../pages/dashboard/TrainingForm';
 import type { StravaAnalysis } from '../../lib/strava-analyzer';
+import type { Activity } from '../../lib/types';
 
 interface FormStepProps {
   data: TrainingFormData;
   onChange: (updates: Partial<TrainingFormData>) => void;
   stravaAnalysis?: StravaAnalysis | null;
+  recentActivities?: Activity[];
 }
 
 const LEVEL_OPTIONS = [
@@ -26,7 +28,7 @@ function StravaBadge() {
   );
 }
 
-export default function FormStepHistory({ data, onChange, stravaAnalysis }: FormStepProps) {
+export default function FormStepHistory({ data, onChange, stravaAnalysis, recentActivities }: FormStepProps) {
   const hasStrava = !!stravaAnalysis;
 
   return (
@@ -148,33 +150,82 @@ export default function FormStepHistory({ data, onChange, stravaAnalysis }: Form
           </div>
         </div>
 
-        {/* Recent race distance + time */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block font-body font-semibold text-bark mb-2 text-sm">
-              Distância prova recente
-            </label>
-            <input
-              type="text"
-              value={data.recentRaceDistance}
-              onChange={(e) => onChange({ recentRaceDistance: e.target.value })}
-              placeholder="Ex: 21k, 10k"
-              className="w-full px-4 py-3 rounded-xl border border-bark/20 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-bark font-body"
-            />
-          </div>
+        {/* Selecionar prova recente */}
+        <div>
+          <label className="block font-body font-semibold text-bark mb-2 text-sm">
+            Alguma dessas atividades foi uma prova?
+          </label>
+          {recentActivities && recentActivities.length > 0 ? (
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              <button
+                type="button"
+                onClick={() => onChange({ recentRaceDistance: '', recentRaceTime: '' })}
+                className={`w-full text-left px-3 py-2 rounded-xl border text-sm transition-all ${
+                  !data.recentRaceDistance
+                    ? 'bg-primary/10 border-primary/30 text-bark'
+                    : 'bg-white border-bark/10 text-bark/60 hover:border-primary/20'
+                }`}
+              >
+                Nenhuma foi prova
+              </button>
+              {recentActivities
+                .filter(a => a.activity_type === 'Run')
+                .slice(0, 10)
+                .map(activity => {
+                  const km = (activity.distance_meters / 1000).toFixed(1);
+                  const mins = Math.floor(activity.moving_time_seconds / 60);
+                  const secs = activity.moving_time_seconds % 60;
+                  const timeStr = `${mins}:${secs.toString().padStart(2, '0')}`;
+                  const date = new Date(activity.start_date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+                  const distKey = activity.distance_meters < 7000 ? '5k' : activity.distance_meters < 12000 ? '10k' : activity.distance_meters < 16000 ? '15k' : activity.distance_meters < 25000 ? '21k' : '42k';
+                  const isSelected = data.recentRaceDistance === distKey && data.recentRaceTime === timeStr;
 
-          <div>
-            <label className="block font-body font-semibold text-bark mb-2 text-sm">
-              Tempo prova recente
-            </label>
-            <input
-              type="text"
-              value={data.recentRaceTime}
-              onChange={(e) => onChange({ recentRaceTime: e.target.value })}
-              placeholder="Ex: 1:45:00"
-              className="w-full px-4 py-3 rounded-xl border border-bark/20 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-bark font-body"
-            />
-          </div>
+                  return (
+                    <button
+                      key={activity.id}
+                      type="button"
+                      onClick={() => onChange({ recentRaceDistance: distKey, recentRaceTime: timeStr })}
+                      className={`w-full text-left px-3 py-2 rounded-xl border text-sm transition-all ${
+                        isSelected
+                          ? 'bg-primary text-white border-primary'
+                          : 'bg-white border-bark/10 text-bark hover:border-primary/20'
+                      }`}
+                    >
+                      <span className="font-semibold">{activity.name}</span>
+                      <span className={`text-xs ${isSelected ? 'text-white/70' : 'text-bark/50'} ml-2`}>
+                        {date} · {km}km · {timeStr}
+                      </span>
+                    </button>
+                  );
+                })}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-xs text-bark/50">Sem atividades do Strava. Informe manualmente:</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-bark/60 mb-1">Distância da prova</label>
+                  <input
+                    type="text"
+                    value={data.recentRaceDistance}
+                    onChange={(e) => onChange({ recentRaceDistance: e.target.value })}
+                    placeholder="Ex: 10k"
+                    className="w-full px-3 py-2 rounded-xl border border-bark/20 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm text-bark font-body"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-bark/60 mb-1">Tempo</label>
+                  <input
+                    type="text"
+                    value={data.recentRaceTime}
+                    onChange={(e) => onChange({ recentRaceTime: e.target.value })}
+                    placeholder="Ex: 52:30"
+                    className="w-full px-3 py-2 rounded-xl border border-bark/20 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm text-bark font-body"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Current easy pace */}

@@ -296,6 +296,7 @@ export interface RaceRegistration {
   registration_number?: string | null;
   goal_time?: string | null; // HH:MM:SS
   notes?: string | null;
+  race_terrain?: string | null;
   status: 'upcoming' | 'completed' | 'cancelled';
   result_time?: string | null; // HH:MM:SS
   result_position?: number | null;
@@ -312,6 +313,7 @@ export interface RaceFormData {
   registration_number?: string;
   goal_time?: string;
   notes?: string;
+  race_terrain?: string;
 }
 
 // ─────────────────────────────────────────────

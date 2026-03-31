@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, XCircle, Activity, Zap, Target } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, Activity as ActivityIcon, Zap, Target } from 'lucide-react';
 import { getAuthHeaders, clearSession } from '../../lib/auth';
 import { analyzeActivities, type StravaAnalysis } from '../../lib/strava-analyzer';
 import { estimateVDOT, type VDOTRow } from '../../lib/vdot';
 import { generatePlan } from '../../lib/plan-generator';
 import { createTrainingPlan } from '../../lib/api';
-import type { RaceRegistration } from '../../lib/types';
+import type { RaceRegistration, Activity } from '../../lib/types';
 import Toast from '../../components/Toast';
-import FormStepRace from '../../components/training/FormStepRace';
 import FormStepProfile from '../../components/training/FormStepProfile';
 import FormStepHistory from '../../components/training/FormStepHistory';
 import FormStepRoutine from '../../components/training/FormStepRoutine';
@@ -102,9 +101,10 @@ export default function TrainingForm() {
   const navigate = useNavigate();
   const { raceId } = useParams();
 
-  const [currentStep, setCurrentStep] = useState(0); // 0=prep, 1-7=steps
+  const [currentStep, setCurrentStep] = useState(0); // 0=prep, 1-6=steps
   const [formData, setFormData] = useState<TrainingFormData>(DEFAULT_FORM);
   const [stravaAnalysis, setStravaAnalysis] = useState<StravaAnalysis | null>(null);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [estimatedVdot, setEstimatedVdot] = useState<VDOTRow | null>(null);
   const [stravaConnected, setStravaConnected] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -150,6 +150,7 @@ export default function TrainingForm() {
               raceDate: race.race_date,
               raceCity: race.location || '',
               raceDistance: mapDistanceToKey(race.distance),
+              raceTerrain: (race.race_terrain as 'road' | 'trail' | 'mixed') || 'road',
             }));
           }
         }
@@ -169,9 +170,10 @@ export default function TrainingForm() {
       const activitiesRes = await fetch('/api/activities/list?days=90', { headers: getAuthHeaders() });
       if (activitiesRes.ok) {
         const activitiesData = await activitiesRes.json();
-        const activities = activitiesData.data?.activities || [];
-        if (activities.length > 0) {
-          const analysis = analyzeActivities(activities);
+        const activityList: Activity[] = activitiesData.data?.activities || [];
+        setActivities(activityList);
+        if (activityList.length > 0) {
+          const analysis = analyzeActivities(activityList);
           setStravaAnalysis(analysis);
           setFormData(prev => ({
             ...prev,
@@ -277,8 +279,8 @@ export default function TrainingForm() {
     return '42k';
   }
 
-  const STEP_LABELS = ['Preparação', 'A Prova', 'Perfil', 'Histórico', 'Rotina', 'Saúde', 'Objetivos', 'Resumo'];
-  const TOTAL_STEPS = 7;
+  const STEP_LABELS = ['Preparação', 'Perfil', 'Histórico', 'Rotina', 'Saúde', 'Objetivos', 'Resumo'];
+  const TOTAL_STEPS = 6;
 
   if (loading) {
     return (
@@ -430,7 +432,7 @@ export default function TrainingForm() {
 
               {stravaAnalysis && (
                 <div className="flex items-start gap-3">
-                  <Activity size={20} className="text-accent mt-0.5 flex-shrink-0" />
+                  <ActivityIcon size={20} className="text-accent mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="font-body font-semibold text-sm text-bark">
                       Nível detectado: <span className="text-accent capitalize">{stravaAnalysis.estimatedLevel}</span>
@@ -457,7 +459,7 @@ export default function TrainingForm() {
 
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-5 border border-primary/10">
               <p className="text-sm text-bark/70 font-body">
-                O formulário tem <strong>7 etapas</strong> e leva cerca de <strong>5 minutos</strong>.
+                O formulário tem <strong>6 etapas</strong> e leva cerca de <strong>5 minutos</strong>.
                 Ao final, um plano completo semana a semana será gerado para você.
               </p>
             </div>
@@ -477,24 +479,21 @@ export default function TrainingForm() {
             {/* Step content */}
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-primary/10 min-h-[300px]">
               {currentStep === 1 && (
-                <FormStepRace data={formData} onChange={handleChange} />
-              )}
-              {currentStep === 2 && (
                 <FormStepProfile data={formData} onChange={handleChange} />
               )}
-              {currentStep === 3 && (
-                <FormStepHistory data={formData} onChange={handleChange} stravaAnalysis={stravaAnalysis} />
+              {currentStep === 2 && (
+                <FormStepHistory data={formData} onChange={handleChange} stravaAnalysis={stravaAnalysis} recentActivities={activities} />
               )}
-              {currentStep === 4 && (
+              {currentStep === 3 && (
                 <FormStepRoutine data={formData} onChange={handleChange} stravaAnalysis={stravaAnalysis} />
               )}
-              {currentStep === 5 && (
+              {currentStep === 4 && (
                 <FormStepHealth data={formData} onChange={handleChange} />
               )}
-              {currentStep === 6 && (
+              {currentStep === 5 && (
                 <FormStepGoals data={formData} onChange={handleChange} vdot={estimatedVdot} />
               )}
-              {currentStep === 7 && (
+              {currentStep === 6 && (
                 <FormStepSummary
                   data={formData}
                   onChange={handleChange}

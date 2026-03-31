@@ -169,23 +169,36 @@ export default function FormStepSummary({
         </div>
 
         {/* Summary sections */}
-        <SummarySection
-          icon="🏆"
-          title="A Prova"
-          step={1}
-          goToStep={goToStep}
-          rows={[
-            { label: 'Distância', value: data.raceDistance.toUpperCase() },
-            { label: 'Prova', value: data.raceName },
-            { label: 'Data', value: data.raceDate },
-            { label: 'Terreno', value: TERRAIN_LABELS[data.raceTerrain] || data.raceTerrain },
-          ]}
-        />
+
+        {/* Race info — read-only, loaded from race registration */}
+        <div className="bg-accent/10 rounded-xl p-4 mb-2">
+          <span className="font-body font-semibold text-sm text-bark">🏆 Prova</span>
+          <div className="mt-2 space-y-1">
+            <div className="flex justify-between">
+              <span className="text-xs text-bark/50">Prova</span>
+              <span className="text-xs font-semibold text-bark">{data.raceName} — {data.raceDistance.toUpperCase()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-xs text-bark/50">Data</span>
+              <span className="text-xs font-semibold text-bark">{data.raceDate}</span>
+            </div>
+            {data.raceCity && (
+              <div className="flex justify-between">
+                <span className="text-xs text-bark/50">Local</span>
+                <span className="text-xs font-semibold text-bark">{data.raceCity}</span>
+              </div>
+            )}
+            <div className="flex justify-between">
+              <span className="text-xs text-bark/50">Terreno</span>
+              <span className="text-xs font-semibold text-bark">{TERRAIN_LABELS[data.raceTerrain] || data.raceTerrain}</span>
+            </div>
+          </div>
+        </div>
 
         <SummarySection
           icon="👤"
           title="Perfil"
-          step={2}
+          step={1}
           goToStep={goToStep}
           rows={[
             { label: 'Nome', value: data.runnerName },
@@ -198,7 +211,7 @@ export default function FormStepSummary({
         <SummarySection
           icon="📊"
           title="Histórico"
-          step={3}
+          step={2}
           goToStep={goToStep}
           rows={[
             { label: 'Nível', value: LEVEL_LABELS[data.experienceLevel] || data.experienceLevel },
@@ -210,7 +223,7 @@ export default function FormStepSummary({
         <SummarySection
           icon="📅"
           title="Rotina"
-          step={4}
+          step={3}
           goToStep={goToStep}
           rows={[
             { label: 'Dias/semana', value: `${data.daysPerWeek} dias` },
@@ -222,7 +235,7 @@ export default function FormStepSummary({
         <SummarySection
           icon="🩺"
           title="Saúde"
-          step={5}
+          step={4}
           goToStep={goToStep}
           rows={[
             { label: 'Lesões', value: data.injuries || 'Nenhuma' },
@@ -234,7 +247,7 @@ export default function FormStepSummary({
         <SummarySection
           icon="🎯"
           title="Objetivos"
-          step={6}
+          step={5}
           goToStep={goToStep}
           rows={[
             { label: 'Objetivo', value: GOAL_LABELS[data.goalType] || data.goalType },

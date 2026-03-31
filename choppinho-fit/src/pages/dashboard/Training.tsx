@@ -44,6 +44,7 @@ export default function Training() {
     registration_number: "",
     goal_time: "",
     notes: "",
+    race_terrain: "road",
   });
   const [saving, setSaving] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null);
@@ -99,6 +100,7 @@ export default function Training() {
         registration_number: race.registration_number || "",
         goal_time: race.goal_time || "",
         notes: race.notes || "",
+        race_terrain: race.race_terrain || "road",
       });
     } else {
       setEditingRace(null);
@@ -111,6 +113,7 @@ export default function Training() {
         registration_number: "",
         goal_time: "",
         notes: "",
+        race_terrain: "road",
       });
     }
     setShowModal(true);
@@ -604,7 +607,7 @@ export default function Training() {
                 </div>
 
                 {/* Distância */}
-                <div>
+                <div className="mb-4">
                   <label className="block text-sm font-semibold text-bark mb-2">Distância *</label>
                   <div className="flex flex-wrap gap-2">
                     {[
@@ -613,8 +616,8 @@ export default function Training() {
                       { label: '13K', value: 13 },
                       { label: '15K', value: 15 },
                       { label: '18K', value: 18 },
-                      { label: 'Meia Maratona', value: 21.1 },
-                      { label: 'Maratona', value: 42.195 },
+                      { label: 'Meia Maratona (21.1km)', value: 21.1 },
+                      { label: 'Maratona (42.2km)', value: 42.195 },
                     ].map(d => (
                       <button
                         key={d.value}
@@ -626,6 +629,29 @@ export default function Training() {
                             : 'bg-white border-bark/20 text-bark hover:border-primary/40'
                         }`}
                       >{d.label}</button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Terreno */}
+                <div className="mb-4">
+                  <label className="block text-sm font-semibold text-bark mb-2">Terreno</label>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { value: 'road', label: 'Asfalto' },
+                      { value: 'trail', label: 'Trail' },
+                      { value: 'mixed', label: 'Misto' },
+                    ].map(t => (
+                      <button
+                        key={t.value}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, race_terrain: t.value })}
+                        className={`px-4 py-2.5 rounded-xl border font-semibold text-sm transition-all ${
+                          formData.race_terrain === t.value
+                            ? 'bg-primary text-white border-primary'
+                            : 'bg-white border-bark/20 text-bark hover:border-primary/40'
+                        }`}
+                      >{t.label}</button>
                     ))}
                   </div>
                 </div>
