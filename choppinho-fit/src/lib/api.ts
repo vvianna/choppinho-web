@@ -204,6 +204,15 @@ export const getTrainingPlan = async (id: string) => {
   return response.json();
 };
 
+export const getActivitiesList = async (days: number = 90) => {
+  const response = await fetch(`/api/activities/list?days=${days}`, {
+    headers: getAuthHeaders(),
+  });
+  if (response.status === 401) { clearSession(); window.location.href = '/login'; return; }
+  if (!response.ok) throw new Error('Erro ao buscar atividades');
+  return response.json();
+};
+
 // ─────────────────────────────────────────────
 // Exports
 // ─────────────────────────────────────────────
@@ -221,4 +230,5 @@ export default {
   getTrainingPlans,
   createTrainingPlan,
   getTrainingPlan,
+  getActivitiesList,
 };

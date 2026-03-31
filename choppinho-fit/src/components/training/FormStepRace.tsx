@@ -10,12 +10,11 @@ interface FormStepProps {
 const DISTANCES = [
   { key: '5k', label: '5K' },
   { key: '10k', label: '10K' },
+  { key: '13k', label: '13K' },
   { key: '15k', label: '15K' },
-  { key: '21k', label: '21K' },
-  { key: '30k', label: '30K' },
-  { key: '42k', label: '42K' },
-  { key: 'ultra', label: 'Ultra' },
-  { key: 'custom', label: 'Outra' },
+  { key: '18k', label: '18K' },
+  { key: '21k', label: 'Meia Maratona' },
+  { key: '42k', label: 'Maratona' },
 ];
 
 export default function FormStepRace({ data, onChange }: FormStepProps) {
@@ -46,26 +45,6 @@ export default function FormStepRace({ data, onChange }: FormStepProps) {
             ))}
           </div>
         </div>
-
-        {/* Custom distance input */}
-        {data.raceDistance === 'custom' && (
-          <div>
-            <label className="block font-body font-semibold text-bark mb-2 text-sm">
-              Distância personalizada (km)
-            </label>
-            <input
-              type="number"
-              min={1}
-              step={0.1}
-              value={data.raceDistanceCustom}
-              onChange={(e) =>
-                onChange({ raceDistanceCustom: e.target.value === '' ? '' : Number(e.target.value) })
-              }
-              placeholder="Ex: 25"
-              className="w-full px-4 py-3 rounded-xl border border-bark/20 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-bark font-body"
-            />
-          </div>
-        )}
 
         {/* Race name */}
         <div>

@@ -166,10 +166,10 @@ export default function TrainingForm() {
         }
       }
       // Use period=month (dashboard only supports 'week' | 'month'; 'quarter' falls through to 7-day default)
-      const dashRes = await fetch('/api/stats/dashboard?period=month', { headers: getAuthHeaders() });
-      if (dashRes.ok) {
-        const dashData = await dashRes.json();
-        const activities = dashData.data?.recent_activities || [];
+      const activitiesRes = await fetch('/api/activities/list?days=90', { headers: getAuthHeaders() });
+      if (activitiesRes.ok) {
+        const activitiesData = await activitiesRes.json();
+        const activities = activitiesData.data?.activities || [];
         if (activities.length > 0) {
           const analysis = analyzeActivities(activities);
           setStravaAnalysis(analysis);
@@ -262,10 +262,10 @@ export default function TrainingForm() {
   function mapDistanceToKey(km: number): string {
     if (km <= 5) return '5k';
     if (km <= 10) return '10k';
+    if (km <= 13) return '13k';
     if (km <= 15) return '15k';
+    if (km <= 18) return '18k';
     if (km <= 21.5) return '21k';
-    if (km <= 30) return '30k';
-    if (km <= 42.5) return '42k';
     return '42k';
   }
 
