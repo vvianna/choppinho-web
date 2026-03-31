@@ -124,10 +124,12 @@ export default function TrainingForm() {
         navigate('/login');
         return;
       }
+      let isStravaConnected = false;
       if (profileRes.ok) {
         const profileData = await profileRes.json();
         const profile = profileData.data;
-        setStravaConnected(!!profile.strava_connection);
+        isStravaConnected = !!profile.strava_connection;
+        setStravaConnected(isStravaConnected);
         setFormData(prev => ({
           ...prev,
           runnerName: profile.user.first_name || '',
@@ -154,7 +156,17 @@ export default function TrainingForm() {
       }
 
       // 3. Fetch activities for Strava analysis
-      const dashRes = await fetch('/api/stats/dashboard?period=quarter', { headers: getAuthHeaders() });
+      // Trigger a sync first so we get fresh/complete activity data
+      // Note: use local isStravaConnected (React state updates are async within this function)
+      if (isStravaConnected) {
+        try {
+          await fetch('/api/strava/sync', { method: 'POST', headers: getAuthHeaders() });
+        } catch (e) {
+          console.error('Sync error:', e);
+        }
+      }
+      // Use period=month (dashboard only supports 'week' | 'month'; 'quarter' falls through to 7-day default)
+      const dashRes = await fetch('/api/stats/dashboard?period=month', { headers: getAuthHeaders() });
       if (dashRes.ok) {
         const dashData = await dashRes.json();
         const activities = dashData.data?.recent_activities || [];

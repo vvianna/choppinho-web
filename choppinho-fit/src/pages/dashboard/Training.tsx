@@ -46,6 +46,7 @@ export default function Training() {
     notes: "",
   });
   const [saving, setSaving] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -171,13 +172,15 @@ export default function Training() {
     }
   };
 
-  const handleDelete = async (raceId: string, raceName: string) => {
-    if (!confirm(`Deseja realmente excluir "${raceName}"?`)) {
-      return;
-    }
+  const handleDeleteClick = (raceId: string, raceName: string) => {
+    setDeleteConfirm({ id: raceId, name: raceName });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteConfirm) return;
 
     try {
-      const response = await fetch(`/api/races?id=${raceId}`, {
+      const response = await fetch(`/api/races?id=${deleteConfirm.id}`, {
         method: "DELETE",
         headers: getAuthHeaders(),
       });
@@ -188,10 +191,12 @@ export default function Training() {
         throw new Error(data.error || "Erro ao excluir prova");
       }
 
+      setDeleteConfirm(null);
       setToast({ message: "Prova excluída", type: "info" });
       fetchData();
     } catch (error: any) {
       console.error("Error deleting race:", error);
+      setDeleteConfirm(null);
       setToast({ message: error.message || "Erro ao excluir prova", type: "error" });
     }
   };
@@ -398,7 +403,7 @@ export default function Training() {
 
                     {/* Delete button */}
                     <button
-                      onClick={() => handleDelete(race.id, race.race_name)}
+                      onClick={() => handleDeleteClick(race.id, race.race_name)}
                       className="p-2 text-bark/60 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
                       title="Excluir prova"
                     >
@@ -496,6 +501,28 @@ export default function Training() {
         )}
       </main>
 
+      {/* Delete Confirmation Dialog */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6">
+            <h3 className="font-display font-bold text-xl text-bark mb-2">Excluir prova?</h3>
+            <p className="text-bark/60 font-body text-sm mb-6">
+              Tem certeza que deseja excluir "<strong>{deleteConfirm.name}</strong>"? Esta ação não pode ser desfeita.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                className="flex-1 px-6 py-3 rounded-xl font-body font-semibold text-bark bg-bark/5 hover:bg-bark/10 transition-colors"
+              >Cancelar</button>
+              <button
+                onClick={handleDeleteConfirm}
+                className="flex-1 px-6 py-3 rounded-xl font-body font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors"
+              >Excluir</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modal de Adicionar/Editar */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -521,23 +548,28 @@ export default function Training() {
 
                 {/* Tipo de Prova - PRIMEIRO */}
                 <div className="mb-4">
-                  <label className="block text-sm font-semibold text-bark mb-2">
-                    Tipo de Prova *
-                  </label>
-                  <select
-                    value={formData.race_type}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        race_type: e.target.value as "running" | "triathlon" | "ironman",
-                      })
-                    }
-                    className="w-full px-4 py-3 rounded-xl border border-bark/20 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors font-body"
-                  >
-                    <option value="running">🏃 Corrida</option>
-                    <option value="triathlon">🏊 Triatlon</option>
-                    <option value="ironman">💪 Ironman</option>
-                  </select>
+                  <label className="block text-sm font-semibold text-bark mb-2">Tipo de Prova *</label>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, race_type: "running" })}
+                      className={`px-4 py-2.5 rounded-xl border font-semibold text-sm transition-all ${
+                        formData.race_type === "running"
+                          ? "bg-primary text-white border-primary"
+                          : "bg-white border-bark/20 text-bark hover:border-primary/40"
+                      }`}
+                    >🏃 Corrida</button>
+                    <button
+                      type="button"
+                      disabled
+                      className="px-4 py-2.5 rounded-xl border font-semibold text-sm bg-bark/5 border-bark/10 text-bark/30 cursor-not-allowed"
+                    >🏊 Triatlon <span className="text-xs">(em breve)</span></button>
+                    <button
+                      type="button"
+                      disabled
+                      className="px-4 py-2.5 rounded-xl border font-semibold text-sm bg-bark/5 border-bark/10 text-bark/30 cursor-not-allowed"
+                    >💪 Ironman <span className="text-xs">(em breve)</span></button>
+                  </div>
                 </div>
 
                 {/* Nome da Prova */}
@@ -556,38 +588,45 @@ export default function Training() {
                   />
                 </div>
 
-                {/* Data e Distância */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-bark mb-2">
-                      Data *
-                    </label>
-                    <input
-                      type="date"
-                      value={formData.race_date}
-                      onChange={(e) =>
-                        setFormData({ ...formData, race_date: e.target.value })
-                      }
-                      className="w-full px-4 py-3 rounded-xl border border-bark/20 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors font-body"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-bark mb-2">
-                      Distância (km) *
-                    </label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={formData.distance || ""}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          distance: parseFloat(e.target.value) || 0,
-                        })
-                      }
-                      placeholder="Ex: 42.2"
-                      className="w-full px-4 py-3 rounded-xl border border-bark/20 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors font-body"
-                    />
+                {/* Data */}
+                <div className="mb-4">
+                  <label className="block text-sm font-semibold text-bark mb-2">
+                    Data *
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.race_date}
+                    onChange={(e) =>
+                      setFormData({ ...formData, race_date: e.target.value })
+                    }
+                    className="w-full px-4 py-3 rounded-xl border border-bark/20 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors font-body"
+                  />
+                </div>
+
+                {/* Distância */}
+                <div>
+                  <label className="block text-sm font-semibold text-bark mb-2">Distância *</label>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { label: '5K', value: 5 },
+                      { label: '10K', value: 10 },
+                      { label: '13K', value: 13 },
+                      { label: '15K', value: 15 },
+                      { label: '18K', value: 18 },
+                      { label: 'Meia Maratona', value: 21.1 },
+                      { label: 'Maratona', value: 42.195 },
+                    ].map(d => (
+                      <button
+                        key={d.value}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, distance: d.value })}
+                        className={`px-4 py-2 rounded-xl border font-semibold text-sm transition-all ${
+                          formData.distance === d.value
+                            ? 'bg-accent text-bark border-accent'
+                            : 'bg-white border-bark/20 text-bark hover:border-primary/40'
+                        }`}
+                      >{d.label}</button>
+                    ))}
                   </div>
                 </div>
               </div>
