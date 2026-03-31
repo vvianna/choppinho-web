@@ -205,7 +205,15 @@ export default function TrainingForm() {
   };
 
   const handleChange = (updates: Partial<TrainingFormData>) => {
-    setFormData(prev => ({ ...prev, ...updates }));
+    setFormData(prev => {
+      const next = { ...prev, ...updates };
+      // Recalculate VDOT when user fills in race result manually
+      if (('recentRaceDistance' in updates || 'recentRaceTime' in updates) && next.recentRaceDistance && next.recentRaceTime) {
+        const vdot = estimateVDOT(next.recentRaceDistance, next.recentRaceTime);
+        if (vdot) setEstimatedVdot(vdot);
+      }
+      return next;
+    });
   };
 
   const handleGenerate = async () => {
@@ -406,16 +414,16 @@ export default function TrainingForm() {
                 {estimatedVdot ? (
                   <CheckCircle size={20} className="text-primary mt-0.5 flex-shrink-0" />
                 ) : (
-                  <XCircle size={20} className="text-bark/30 mt-0.5 flex-shrink-0" />
+                  <Zap size={20} className="text-accent mt-0.5 flex-shrink-0" />
                 )}
                 <div>
-                  <p className={`font-body font-semibold text-sm ${estimatedVdot ? 'text-bark' : 'text-bark/50'}`}>
-                    VDOT estimado
+                  <p className={`font-body font-semibold text-sm ${estimatedVdot ? 'text-bark' : 'text-bark/70'}`}>
+                    {estimatedVdot ? 'VDOT estimado' : 'VDOT será calculado'}
                   </p>
                   <p className="text-xs text-bark/50 font-body">
                     {estimatedVdot
                       ? `VDOT ${estimatedVdot.vdot} · Ritmo fácil ${estimatedVdot.e}/km`
-                      : 'Calculado após informar resultados de provas'}
+                      : 'Informe um resultado de prova no passo 3 para calcular, ou usaremos valores padrão'}
                   </p>
                 </div>
               </div>
