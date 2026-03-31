@@ -5,6 +5,9 @@ import AuthVerify from "./pages/AuthVerify";
 import Dashboard from "./pages/dashboard/Index";
 import Settings from "./pages/dashboard/Settings";
 import Races from "./pages/dashboard/Races";
+import Training from "./pages/dashboard/Training";
+import TrainingForm from "./pages/dashboard/TrainingForm";
+import PlanView from "./pages/dashboard/PlanView";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -42,6 +45,9 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/dashboard/treino" element={<ProtectedRoute><Training /></ProtectedRoute>} />
+        <Route path="/dashboard/treino/novo/:raceId?" element={<ProtectedRoute><TrainingForm /></ProtectedRoute>} />
+        <Route path="/dashboard/treino/plano/:planId" element={<ProtectedRoute><PlanView /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   );

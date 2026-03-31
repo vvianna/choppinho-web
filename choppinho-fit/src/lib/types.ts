@@ -55,9 +55,106 @@ export interface Activity {
   suffer_score: number | null;
   calories: number | null;
   average_cadence: number | null;
+  workout_type?: number; // 0=default, 1=race, 3=workout (interval/tempo)
   splits_json: any | null; // JSONB
   insight_sent: boolean;
   synced_at: string;
+  // Novos campos para análise com IA
+  raw_data?: any; // JSON completo do Strava
+  analysis_summary?: string; // Resumo 2-3 linhas
+  analysis_detailed?: string; // Análise completa
+  analysis_generated_at?: string;
+  summary_sent?: boolean;
+  detailed_sent?: boolean;
+  analysis_insights?: AnalysisInsights;
+}
+
+// Insights estruturados da análise
+export interface AnalysisInsights {
+  pace_consistency: number; // 0-1
+  heart_rate_zones?: {
+    zone1: number;
+    zone2: number;
+    zone3: number;
+    zone4: number;
+    zone5: number;
+  };
+  improvement_rate?: number;
+  fatigue_level?: 'low' | 'medium' | 'high';
+  training_load?: 'low' | 'optimal' | 'high' | 'overtraining';
+  recommendations?: string[];
+  personal_records?: {
+    fastest_5k?: boolean;
+    fastest_10k?: boolean;
+    longest_run?: boolean;
+    best_pace?: boolean;
+  };
+}
+
+// Comparação entre atividades
+export interface ActivityComparison {
+  id: string;
+  user_id: string;
+  activity_id: string;
+  compared_with_id: string;
+  comparison_type: 'similar_distance' | 'similar_route' | 'pb_attempt' | 'weekly_best' | 'monthly_best';
+  similarity_score: number; // 0-1
+  metrics_comparison: MetricsComparison;
+  insights?: string;
+  generated_at: string;
+}
+
+// Métricas comparativas
+export interface MetricsComparison {
+  distance: {
+    activity_1: number;
+    activity_2: number;
+    difference: number;
+    percentage: number;
+  };
+  pace: {
+    activity_1: number; // segundos/km
+    activity_2: number;
+    difference: number;
+    percentage: number;
+    improvement: boolean;
+  };
+  heart_rate?: {
+    activity_1: number;
+    activity_2: number;
+    difference: number;
+    efficiency_gain: boolean;
+  };
+  elevation?: {
+    activity_1: number;
+    activity_2: number;
+    difference: number;
+  };
+  splits?: Array<{
+    km: number;
+    pace_1: number;
+    pace_2: number;
+    difference: number;
+  }>;
+}
+
+// View materializada para consultas externas
+export interface ComparisonView extends ActivityComparison {
+  activity_date: string;
+  activity_distance: number;
+  activity_time: number;
+  activity_speed: number;
+  activity_hr?: number;
+  compared_date: string;
+  compared_distance: number;
+  compared_time: number;
+  compared_speed: number;
+  compared_hr?: number;
+  distance_change_pct: number;
+  speed_change_pct: number;
+  time_improvement_pct: number;
+  user_name?: string;
+  user_phone: string;
 }
 
 export interface NotificationPreferences {
@@ -215,4 +312,86 @@ export interface RaceFormData {
   registration_number?: string;
   goal_time?: string;
   notes?: string;
+}
+
+// ─────────────────────────────────────────────
+// Plano de Treino
+// ─────────────────────────────────────────────
+
+export interface TrainingPlan {
+  id: string;
+  user_id: string;
+  race_id?: string;
+  created_at: string;
+  updated_at: string;
+
+  // Prova
+  race_distance: string;
+  race_distance_custom?: number;
+  race_name?: string;
+  race_date?: string;
+  race_city?: string;
+  race_terrain: 'road' | 'trail' | 'mixed';
+
+  // Perfil
+  runner_name?: string;
+  age?: number;
+  gender?: 'm' | 'f' | 'o';
+  weight?: number;
+  height?: number;
+
+  // Histórico
+  experience_level?: 'sedentary' | 'beginner' | 'intermediate' | 'advanced' | 'competitive';
+  weekly_km?: number;
+  longest_run?: number;
+  recent_race_distance?: string;
+  recent_race_time?: string;
+  current_pace_easy?: string;
+  strava_data?: any;
+
+  // Rotina
+  days_per_week: number;
+  max_time_weekday?: number;
+  max_time_weekend?: number;
+  preferred_time: 'morning' | 'afternoon' | 'evening' | 'flexible';
+  cross_training?: string[];
+  has_watch: boolean;
+  uses_heart_rate: boolean;
+
+  // Saúde
+  injuries?: string;
+  health_conditions?: string;
+  sleep_hours?: number;
+  stress_level: 'low' | 'moderate' | 'high';
+
+  // Objetivos
+  goal_type?: 'finish' | 'time' | 'pr' | 'compete';
+  target_time?: string;
+  motivation?: string;
+  biggest_challenge?: string;
+
+  // Plano gerado
+  plan_data?: any;
+  vdot_score?: number;
+  total_weeks?: number;
+  ai_insights?: any;
+  status: 'draft' | 'active' | 'completed';
+}
+
+export interface PlanSessionLog {
+  id: string;
+  plan_id: string;
+  week_number: number;
+  day_of_week: number;
+  scheduled_date: string;
+  session_type: string;
+
+  strava_activity_id?: number;
+  completed: boolean;
+  completed_at?: string;
+
+  difficulty?: 'easy' | 'normal' | 'hard';
+  notes?: string;
+
+  created_at: string;
 }

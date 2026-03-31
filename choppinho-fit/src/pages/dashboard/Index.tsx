@@ -113,12 +113,12 @@ export default function Dashboard() {
 
           <div className="flex items-center gap-2 sm:gap-4">
             <button
-              onClick={() => navigate("/dashboard/races")}
+              onClick={() => navigate("/dashboard/treino")}
               className="flex items-center gap-1 sm:gap-2 text-bark/60 hover:text-primary font-body text-sm transition-colors p-2 sm:p-0"
-              title="Provas"
+              title="Provas & Treino"
             >
               <Trophy size={16} />
-              <span className="hidden sm:inline">Provas</span>
+              <span className="hidden sm:inline">Provas &amp; Treino</span>
             </button>
 
             <button

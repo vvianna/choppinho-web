@@ -43,7 +43,49 @@ export interface Activity {
   average_heartrate?: number;
   max_heartrate?: number;
   calories?: number;
+  workout_type?: number; // 0=default, 1=race, 3=workout (interval/tempo)
   synced_at: string;
+  // Novos campos para análise com IA
+  raw_data?: any;
+  analysis_summary?: string;
+  analysis_detailed?: string;
+  analysis_generated_at?: string;
+  summary_sent?: boolean;
+  detailed_sent?: boolean;
+  analysis_insights?: AnalysisInsights;
+}
+
+export interface AnalysisInsights {
+  pace_consistency: number;
+  heart_rate_zones?: {
+    zone1: number;
+    zone2: number;
+    zone3: number;
+    zone4: number;
+    zone5: number;
+  };
+  improvement_rate?: number;
+  fatigue_level?: 'low' | 'medium' | 'high';
+  training_load?: 'low' | 'optimal' | 'high' | 'overtraining';
+  recommendations?: string[];
+  personal_records?: {
+    fastest_5k?: boolean;
+    fastest_10k?: boolean;
+    longest_run?: boolean;
+    best_pace?: boolean;
+  };
+}
+
+export interface ActivityComparison {
+  id: string;
+  user_id: string;
+  activity_id: string;
+  compared_with_id: string;
+  comparison_type: 'similar_distance' | 'similar_route' | 'pb_attempt' | 'weekly_best' | 'monthly_best';
+  similarity_score: number;
+  metrics_comparison: any;
+  insights?: string;
+  generated_at: string;
 }
 
 export interface NotificationPreferences {

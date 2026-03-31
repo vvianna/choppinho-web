@@ -8,6 +8,7 @@ import type {
   DashboardStats,
   NotificationPreferences,
 } from './types';
+import { getAuthHeaders, clearSession } from './auth';
 
 // ─────────────────────────────────────────────
 // Base URL das APIs (Cloudflare Functions)
@@ -172,6 +173,37 @@ export const getSubscriptionStatus = async (): Promise<{
   });
 };
 
+// ─── Training Plans ───
+
+export const getTrainingPlans = async () => {
+  const response = await fetch('/api/training-plans', {
+    headers: getAuthHeaders(),
+  });
+  if (response.status === 401) { clearSession(); window.location.href = '/login'; return; }
+  if (!response.ok) throw new Error('Erro ao buscar planos');
+  return response.json();
+};
+
+export const createTrainingPlan = async (data: Record<string, unknown>) => {
+  const response = await fetch('/api/training-plans', {
+    method: 'POST',
+    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (response.status === 401) { clearSession(); window.location.href = '/login'; return; }
+  if (!response.ok) throw new Error('Erro ao criar plano');
+  return response.json();
+};
+
+export const getTrainingPlan = async (id: string) => {
+  const response = await fetch(`/api/training-plans?id=${id}`, {
+    headers: getAuthHeaders(),
+  });
+  if (response.status === 401) { clearSession(); window.location.href = '/login'; return; }
+  if (!response.ok) throw new Error('Plano não encontrado');
+  return response.json();
+};
+
 // ─────────────────────────────────────────────
 // Exports
 // ─────────────────────────────────────────────
@@ -186,4 +218,7 @@ export default {
   getStravaAuthUrl,
   disconnectStrava,
   getSubscriptionStatus,
+  getTrainingPlans,
+  createTrainingPlan,
+  getTrainingPlan,
 };
