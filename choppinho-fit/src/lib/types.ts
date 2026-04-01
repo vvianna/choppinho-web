@@ -23,6 +23,12 @@ export interface User {
   personality_mode: 'default' | 'offensive' | 'light_zen';
   // Fase 5: Apelidos
   nicknames: string[]; // Lista de apelidos para personalização (ex: ["Monstro", "Fera"])
+  // Campos de perfil físico
+  age?: number | null;
+  gender?: string | null;
+  weight?: number | null;
+  height?: number | null;
+  city?: string | null;
 }
 
 export interface StravaConnection {

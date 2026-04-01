@@ -11,7 +11,6 @@ import Toast from '../../components/Toast';
 import FormStepProfile from '../../components/training/FormStepProfile';
 import FormStepHistory from '../../components/training/FormStepHistory';
 import FormStepRoutine from '../../components/training/FormStepRoutine';
-import FormStepHealth from '../../components/training/FormStepHealth';
 import FormStepGoals from '../../components/training/FormStepGoals';
 import FormStepSummary from '../../components/training/FormStepSummary';
 
@@ -130,9 +129,14 @@ export default function TrainingForm() {
         const profile = profileData.data;
         isStravaConnected = !!profile.strava_connection;
         setStravaConnected(isStravaConnected);
+        const user = profile.user;
         setFormData(prev => ({
           ...prev,
-          runnerName: profile.user.first_name || '',
+          runnerName: user.first_name || '',
+          age: user.age || '',
+          gender: user.gender || '',
+          weight: user.weight || '',
+          height: user.height || '',
         }));
       }
 
@@ -175,6 +179,17 @@ export default function TrainingForm() {
         if (activityList.length > 0) {
           const analysis = analyzeActivities(activityList);
           setStravaAnalysis(analysis);
+
+          // Infer preferred training time from activities
+          const hours = activityList
+            .filter((a: Activity) => a.activity_type === 'Run')
+            .map((a: Activity) => new Date(a.start_date).getHours());
+          let preferredTime = 'morning';
+          if (hours.length > 0) {
+            const avgHour = hours.reduce((s: number, h: number) => s + h, 0) / hours.length;
+            preferredTime = avgHour < 11 ? 'morning' : avgHour < 15 ? 'afternoon' : 'evening';
+          }
+
           setFormData(prev => ({
             ...prev,
             experienceLevel: analysis.estimatedLevel,
@@ -185,6 +200,7 @@ export default function TrainingForm() {
             daysPerWeek: Math.round(analysis.avgRunsPerWeek) || 4,
             hasWatch: true,
             usesHeartRate: !!analysis.avgHR,
+            preferredTime,
           }));
           // Estimate VDOT if races found
           if (analysis.bestRace) {
@@ -216,6 +232,29 @@ export default function TrainingForm() {
       }
       return next;
     });
+  };
+
+  const saveProfileData = async () => {
+    try {
+      await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          first_name: formData.runnerName,
+          age: Number(formData.age) || null,
+          gender: formData.gender || null,
+          weight: Number(formData.weight) || null,
+          height: Number(formData.height) || null,
+        }),
+      });
+    } catch (err) {
+      console.error('Error saving profile:', err);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentStep === 1) saveProfileData();
+    setCurrentStep(prev => prev + 1);
   };
 
   const handleGenerate = async () => {
@@ -279,8 +318,8 @@ export default function TrainingForm() {
     return '42k';
   }
 
-  const STEP_LABELS = ['Preparação', 'Perfil', 'Histórico', 'Rotina', 'Saúde', 'Objetivos', 'Resumo'];
-  const TOTAL_STEPS = 6;
+  const STEP_LABELS = ['Preparação', 'Perfil', 'Histórico', 'Rotina', 'Objetivos', 'Resumo'];
+  const TOTAL_STEPS = 5;
 
   if (loading) {
     return (
@@ -459,7 +498,7 @@ export default function TrainingForm() {
 
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-5 border border-primary/10">
               <p className="text-sm text-bark/70 font-body">
-                O formulário tem <strong>6 etapas</strong> e leva cerca de <strong>5 minutos</strong>.
+                O formulário tem <strong>5 etapas</strong> e leva cerca de <strong>5 minutos</strong>.
                 Ao final, um plano completo semana a semana será gerado para você.
               </p>
             </div>
@@ -488,12 +527,9 @@ export default function TrainingForm() {
                 <FormStepRoutine data={formData} onChange={handleChange} stravaAnalysis={stravaAnalysis} />
               )}
               {currentStep === 4 && (
-                <FormStepHealth data={formData} onChange={handleChange} />
-              )}
-              {currentStep === 5 && (
                 <FormStepGoals data={formData} onChange={handleChange} vdot={estimatedVdot} />
               )}
-              {currentStep === 6 && (
+              {currentStep === 5 && (
                 <FormStepSummary
                   data={formData}
                   onChange={handleChange}
@@ -516,7 +552,7 @@ export default function TrainingForm() {
 
               {currentStep < TOTAL_STEPS ? (
                 <button
-                  onClick={() => setCurrentStep(s => s + 1)}
+                  onClick={handleNext}
                   className="flex-1 px-6 py-4 rounded-xl font-display font-bold text-white bg-primary hover:bg-primary-600 transition-colors shadow-lg shadow-primary/20"
                 >
                   Próximo

@@ -25,7 +25,15 @@ const CROSS_TRAINING_OPTIONS = [
   { label: 'Nenhum', key: 'nenhum' },
 ];
 
-export default function FormStepRoutine({ data, onChange }: FormStepProps) {
+function StravaBadge() {
+  return (
+    <span className="text-xs font-bold px-2 py-0.5 rounded" style={{ background: '#fc6d27', color: 'white' }}>
+      STRAVA
+    </span>
+  );
+}
+
+export default function FormStepRoutine({ data, onChange, stravaAnalysis }: FormStepProps) {
   const toggleCrossTraining = (key: string) => {
     const selected = data.crossTraining.includes(key);
     let updated: string[];
@@ -48,8 +56,9 @@ export default function FormStepRoutine({ data, onChange }: FormStepProps) {
       <div className="space-y-6">
         {/* Days per week */}
         <div>
-          <label className="block font-body font-semibold text-bark mb-2 text-sm">
+          <label className="block font-body font-semibold text-bark mb-2 text-sm flex items-center gap-2">
             Dias por semana
+            {stravaAnalysis && <StravaBadge />}
           </label>
           <div className="flex gap-2 flex-wrap">
             {DAYS_OPTIONS.map((day) => (
@@ -109,8 +118,9 @@ export default function FormStepRoutine({ data, onChange }: FormStepProps) {
 
         {/* Preferred time */}
         <div>
-          <label className="block font-body font-semibold text-bark mb-2 text-sm">
+          <label className="block font-body font-semibold text-bark mb-2 text-sm flex items-center gap-2">
             Horário preferido
+            {stravaAnalysis && <StravaBadge />}
           </label>
           <div className="flex gap-2 flex-wrap">
             {PREFERRED_TIME_OPTIONS.map(({ key, label }) => (
@@ -156,8 +166,9 @@ export default function FormStepRoutine({ data, onChange }: FormStepProps) {
 
         {/* Has GPS watch */}
         <div>
-          <label className="block font-body font-semibold text-bark mb-2 text-sm">
+          <label className="block font-body font-semibold text-bark mb-2 text-sm flex items-center gap-2">
             Usa relógio GPS?
+            {stravaAnalysis && <StravaBadge />}
           </label>
           <div className="flex gap-2">
             <button
@@ -185,8 +196,9 @@ export default function FormStepRoutine({ data, onChange }: FormStepProps) {
 
         {/* Uses heart rate */}
         <div>
-          <label className="block font-body font-semibold text-bark mb-2 text-sm">
+          <label className="block font-body font-semibold text-bark mb-2 text-sm flex items-center gap-2">
             Treina por frequência cardíaca?
+            {stravaAnalysis && <StravaBadge />}
           </label>
           <div className="flex gap-2">
             <button

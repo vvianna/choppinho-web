@@ -103,6 +103,20 @@ export default function FormStepProfile({ data, onChange }: FormStepProps) {
             />
           </div>
         </div>
+
+        {/* Injuries (optional, moved from health step) */}
+        <div>
+          <label className="block font-body font-semibold text-bark mb-2 text-sm">
+            Lesões ou restrições <span className="text-bark/40 font-normal">(opcional)</span>
+          </label>
+          <textarea
+            rows={2}
+            value={data.injuries}
+            onChange={(e) => onChange({ injuries: e.target.value })}
+            placeholder="Ex: Tendinite no joelho tratada em 2025, fascite plantar leve..."
+            className="w-full px-4 py-3 rounded-xl border border-bark/20 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-bark font-body resize-none"
+          />
+        </div>
       </div>
     </div>
   );

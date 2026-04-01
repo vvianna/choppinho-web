@@ -58,11 +58,6 @@ const TERRAIN_LABELS: Record<string, string> = {
   mixed: 'Misto',
 };
 
-const STRESS_LABELS: Record<string, string> = {
-  low: 'Baixo',
-  moderate: 'Moderado',
-  high: 'Alto',
-};
 
 const LEVEL_LABELS: Record<string, string> = {
   beginner: 'Iniciante',
@@ -205,6 +200,7 @@ export default function FormStepSummary({
             { label: 'Idade', value: data.age ? `${data.age} anos` : '' },
             { label: 'Peso', value: data.weight ? `${data.weight} kg` : '' },
             { label: 'Altura', value: data.height ? `${data.height} cm` : '' },
+            { label: 'Lesões', value: data.injuries || '' },
           ]}
         />
 
@@ -233,21 +229,9 @@ export default function FormStepSummary({
         />
 
         <SummarySection
-          icon="🩺"
-          title="Saúde"
-          step={4}
-          goToStep={goToStep}
-          rows={[
-            { label: 'Lesões', value: data.injuries || 'Nenhuma' },
-            { label: 'Sono', value: data.sleepHours || '' },
-            { label: 'Estresse', value: STRESS_LABELS[data.stressLevel] || data.stressLevel },
-          ]}
-        />
-
-        <SummarySection
           icon="🎯"
           title="Objetivos"
-          step={5}
+          step={4}
           goToStep={goToStep}
           rows={[
             { label: 'Objetivo', value: GOAL_LABELS[data.goalType] || data.goalType },

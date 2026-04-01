@@ -14,6 +14,11 @@ interface UpdateProfileBody {
   email?: string;
   nicknames?: string[];
   personality_mode?: 'default' | 'offensive' | 'light_zen';
+  age?: number | null;
+  gender?: string | null;
+  weight?: number | null;
+  height?: number | null;
+  city?: string | null;
 }
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
@@ -174,6 +179,26 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
 
     if (body.personality_mode !== undefined) {
       updateData.personality_mode = body.personality_mode;
+    }
+
+    if (body.age !== undefined) {
+      updateData.age = body.age ?? null;
+    }
+
+    if (body.gender !== undefined) {
+      updateData.gender = body.gender ?? null;
+    }
+
+    if (body.weight !== undefined) {
+      updateData.weight = body.weight ?? null;
+    }
+
+    if (body.height !== undefined) {
+      updateData.height = body.height ?? null;
+    }
+
+    if (body.city !== undefined) {
+      updateData.city = body.city ?? null;
     }
 
     // Atualizar usuário
