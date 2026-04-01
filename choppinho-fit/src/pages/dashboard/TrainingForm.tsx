@@ -108,7 +108,30 @@ export default function TrainingForm() {
   const [stravaConnected, setStravaConnected] = useState(false);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [generatingStep, setGeneratingStep] = useState(0);
+  const [funFactIndex, setFunFactIndex] = useState(0);
   const [toast, setToast] = useState<ToastType>(null);
+
+  const GENERATING_STEPS = [
+    { label: 'Analisando seu perfil de corredor...', icon: '📊' },
+    { label: 'Calculando VDOT e zonas de pace...', icon: '⚡' },
+    { label: 'Personalizando sessões de treino...', icon: '🏃' },
+    { label: 'Coach Choppinho preparando análise...', icon: '🤖' },
+    { label: 'Finalizando seu plano...', icon: '✨' },
+  ];
+
+  const FUN_FACTS = [
+    '💡 Você sabia? 80% do treino de um maratonista de elite é em ritmo leve.',
+    '💰 Este plano personalizado por IA custa cerca de R$15 — um coach cobraria R$300/mês.',
+    '📏 A regra dos 10%: nunca aumente mais de 10% do volume semanal de uma vez.',
+    '🏃 O recorde mundial da meia maratona é 57:31, do Jacob Kiplimo (Uganda).',
+    '🧠 Correr aumenta o BDNF, proteína que melhora memória e aprendizado.',
+    '💪 Treinos leves constroem mais mitocôndrias que treinos intensos.',
+    '🌡️ No calor do Rio, hidrate-se: perca 2% do peso corporal e o pace cai 10%.',
+    '😴 Dormir 7-9h aumenta a produção de hormônio do crescimento — essencial pra recuperação.',
+    '🍌 Uma banana tem 27g de carboidrato — combustível perfeito pré-treino.',
+    '🎯 Corredores que seguem um plano têm 3x mais chance de completar sua prova.',
+  ];
 
   useEffect(() => {
     initializeForm();
@@ -259,9 +282,64 @@ export default function TrainingForm() {
 
   const handleGenerate = async () => {
     setGenerating(true);
+    setGeneratingStep(0);
+
+    const factInterval = setInterval(() => {
+      setFunFactIndex(prev => (prev + 1) % FUN_FACTS.length);
+    }, 4000);
+
+    // Visual steps simulated while API processes
+    const t1 = setTimeout(() => setGeneratingStep(1), 2000);
+    const t2 = setTimeout(() => setGeneratingStep(2), 5000);
+    const t3 = setTimeout(() => setGeneratingStep(3), 10000);
+
     try {
       let planData = null;
       let aiCoaching = null;
+
+      // Generate base plan locally (instant) — used both as fallback and sent to API
+      const basePlan = generatePlan({
+        raceDistance: formData.raceDistance,
+        raceDate: formData.raceDate,
+        experienceLevel: formData.experienceLevel || 'intermediate',
+        currentWeeklyKm: Number(formData.weeklyKm) || 20,
+        daysPerWeek: formData.daysPerWeek,
+        vdot: estimatedVdot,
+        crossTraining: formData.crossTraining,
+      });
+
+      const basePlanSummary = {
+        totalWeeks: basePlan.totalWeeks,
+        phases: basePlan.weeks.reduce((acc: any[], w) => {
+          const existing = acc.find(a => a.phase === w.phase);
+          if (existing) {
+            existing.weeks++;
+            existing.endKm = w.targetKm;
+          } else {
+            acc.push({ phase: w.phase, weeks: 1, startKm: w.targetKm, endKm: w.targetKm });
+          }
+          return acc;
+        }, []),
+        recoveryWeeks: basePlan.weeks.filter(w => w.isRecovery).map(w => w.weekNum),
+        peakVolume: basePlan.peakVolume,
+        currentKm: Number(formData.weeklyKm) || 20,
+        daysPerWeek: formData.daysPerWeek,
+      };
+
+      const planSummary = {
+        totalWeeks: basePlan.totalWeeks,
+        vdotScore: basePlan.vdotScore,
+        peakVolume: basePlan.peakVolume,
+        totalKm: basePlan.totalKm,
+        paces: basePlan.paces,
+        phases: basePlan.weeks.reduce((acc: any, w) => {
+          if (!acc[w.phase]) acc[w.phase] = { weeks: 0, totalKm: 0, avgKm: 0 };
+          acc[w.phase].weeks++;
+          acc[w.phase].totalKm += w.targetKm;
+          acc[w.phase].avgKm = Math.round(acc[w.phase].totalKm / acc[w.phase].weeks);
+          return acc;
+        }, {}),
+      };
 
       // 1. Try AI generation via Opus (preferred)
       try {
@@ -295,6 +373,8 @@ export default function TrainingForm() {
               has_watch: formData.hasWatch,
               uses_heart_rate: formData.usesHeartRate,
             },
+            base_plan: basePlanSummary,
+            plan_summary: planSummary,
           }),
         });
 
@@ -310,20 +390,17 @@ export default function TrainingForm() {
         console.warn('AI generation failed, falling back to algorithmic:', err);
       }
 
-      // 2. Fallback: local algorithmic generation
+      // 2. Fallback: local algorithmic plan already generated above
       if (!planData) {
         console.log('Using algorithmic fallback');
-        const plan = generatePlan({
-          raceDistance: formData.raceDistance,
-          raceDate: formData.raceDate,
-          experienceLevel: formData.experienceLevel || 'intermediate',
-          currentWeeklyKm: Number(formData.weeklyKm) || 20,
-          daysPerWeek: formData.daysPerWeek,
-          vdot: estimatedVdot,
-          crossTraining: formData.crossTraining,
-        });
-        planData = plan;
+        planData = basePlan;
       }
+
+      clearInterval(factInterval);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      setGeneratingStep(4); // Finalizando
 
       // 3. Save to DB
       const result = await createTrainingPlan({
@@ -362,6 +439,10 @@ export default function TrainingForm() {
         navigate('/dashboard/treino');
       }
     } catch (err) {
+      clearInterval(factInterval);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
       console.error('Error generating plan:', err);
       setToast({ message: 'Erro ao gerar plano. Tente novamente.', type: 'error' });
       setGenerating(false);
@@ -577,14 +658,50 @@ export default function TrainingForm() {
           <div className="space-y-6">
             {/* Generating loading overlay */}
             {generating && (
-              <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 border border-primary/10 text-center">
-                <div className="text-5xl mb-4">⚡</div>
-                <h2 className="font-display font-bold text-xl text-bark mb-2">Gerando seu plano...</h2>
-                <p className="text-sm text-bark/60 font-body mb-6">O Coach Choppinho está montando seu treino personalizado</p>
-                <div className="w-48 h-2 bg-bark/10 rounded-full mx-auto overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-primary to-accent rounded-full animate-pulse" style={{width: '70%'}} />
+              <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 border border-primary/10">
+                {/* Title */}
+                <div className="text-center mb-8">
+                  <div className="text-5xl mb-3">⚡</div>
+                  <h2 className="font-display font-bold text-xl text-bark">Gerando seu plano de treino</h2>
+                  <p className="text-sm text-bark/50 font-body mt-1">Isso pode levar até 1 minuto</p>
                 </div>
-                <p className="text-xs text-bark/40 mt-4">Isso pode levar até 30 segundos</p>
+
+                {/* Progress steps */}
+                <div className="max-w-sm mx-auto mb-8 space-y-3">
+                  {GENERATING_STEPS.map((step, i) => {
+                    const isDone = generatingStep > i;
+                    const isActive = generatingStep === i;
+                    return (
+                      <div key={i} className={`flex items-center gap-3 transition-all duration-500 ${isDone ? 'opacity-60' : isActive ? 'opacity-100' : 'opacity-30'}`}>
+                        <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm flex-shrink-0 ${
+                          isDone ? 'bg-primary text-white' : isActive ? 'bg-accent text-bark animate-pulse' : 'bg-bark/10 text-bark/40'
+                        }`}>
+                          {isDone ? '✓' : step.icon}
+                        </div>
+                        <span className={`text-sm font-body ${isDone ? 'text-bark/60 line-through' : isActive ? 'text-bark font-semibold' : 'text-bark/40'}`}>
+                          {step.label}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Progress bar */}
+                <div className="max-w-sm mx-auto mb-6">
+                  <div className="h-2 bg-bark/10 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-1000 ease-out"
+                      style={{ width: `${Math.min(((generatingStep + 1) / GENERATING_STEPS.length) * 100, 95)}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Fun fact */}
+                <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 max-w-sm mx-auto">
+                  <p className="text-sm text-bark/70 font-body text-center transition-opacity duration-500">
+                    {FUN_FACTS[funFactIndex]}
+                  </p>
+                </div>
               </div>
             )}
 
