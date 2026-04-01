@@ -37,22 +37,24 @@ export const onRequestPost: PagesFunction<GenerateEnv> = async (context) => {
       'Authorization': `Bearer ${apiToken}`,
     };
 
-    // Call both endpoints in parallel
+    // Call both endpoints in parallel via N8N relay
     const [personalizeRes, coachingRes] = await Promise.allSettled([
-      // Etapa 2: Sonnet personalizes sessions
-      fetch(`${apiUrl}/v1/choppinho/personalize-plan`, {
+      // Etapa 2: Haiku personalizes sessions
+      fetch(apiUrl, {
         method: 'POST',
         headers,
         body: JSON.stringify({
+          action: 'personalize-plan',
           base_plan: body.base_plan,
           runner_profile: body.runner_profile,
         }),
       }),
       // Etapa 3: Opus generates coaching
-      fetch(`${apiUrl}/v1/choppinho/enhance-training-plan`, {
+      fetch(apiUrl, {
         method: 'POST',
         headers,
         body: JSON.stringify({
+          action: 'enhance-training-plan',
           training_plan: body.plan_summary,
           runner_profile: body.runner_profile,
         }),
