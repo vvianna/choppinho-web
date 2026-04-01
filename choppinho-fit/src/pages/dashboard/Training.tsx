@@ -184,6 +184,7 @@ export default function Training() {
     if (!deleteConfirm) return;
 
     try {
+      console.log('Deleting race:', deleteConfirm.id, deleteConfirm.name);
       const response = await fetch(`/api/races?id=${deleteConfirm.id}`, {
         method: "DELETE",
         headers: getAuthHeaders(),
@@ -612,7 +613,8 @@ export default function Training() {
                     onChange={(e) =>
                       setFormData({ ...formData, race_date: e.target.value })
                     }
-                    className="w-full px-4 py-3 rounded-xl border border-bark/20 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors font-body"
+                    onClick={(e) => (e.target as HTMLInputElement).showPicker?.()}
+                    className="w-full px-4 py-3 rounded-xl border border-bark/20 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors font-body cursor-pointer"
                   />
                 </div>
 

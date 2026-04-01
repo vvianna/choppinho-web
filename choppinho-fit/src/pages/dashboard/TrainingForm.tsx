@@ -3,8 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, XCircle, Activity as ActivityIcon, Zap, Target } from 'lucide-react';
 import { getAuthHeaders, clearSession } from '../../lib/auth';
 import { analyzeActivities, type StravaAnalysis } from '../../lib/strava-analyzer';
-import { estimateVDOT, type VDOTRow } from '../../lib/vdot';
-import { generatePlan } from '../../lib/plan-generator';
+import { estimateVDOT, VDOT_TABLE, type VDOTRow } from '../../lib/vdot';
+import { generatePlan, buildWeekSessions } from '../../lib/plan-generator';
 import { createTrainingPlan } from '../../lib/api';
 import type { RaceRegistration, Activity } from '../../lib/types';
 import Toast from '../../components/Toast';
@@ -384,6 +384,28 @@ export default function TrainingForm() {
             planData = genData.data.plan;
             aiCoaching = genData.data.coaching;
             console.log('AI plan generated successfully');
+
+            // AI returns sessionTypes (strings), need to expand to full sessions
+            if (planData && planData.weeks) {
+              const needsExpansion = planData.weeks.some((w: any) => w.sessionTypes && !w.sessions);
+              if (needsExpansion) {
+                const vdotForSessions = estimatedVdot || VDOT_TABLE.find(r => r.vdot === 34)!;
+                planData.weeks = planData.weeks.map((w: any) => {
+                  if (w.sessionTypes && !w.sessions) {
+                    const sessions = buildWeekSessions({
+                      daysPerWeek: w.sessionTypes.length,
+                      weeklyKm: w.targetKm,
+                      phase: w.phase,
+                      isRecovery: w.isRecovery || false,
+                      vdot: vdotForSessions,
+                      crossTraining: formData.crossTraining,
+                    });
+                    return { ...w, sessions };
+                  }
+                  return w;
+                });
+              }
+            }
           }
         }
       } catch (err) {
