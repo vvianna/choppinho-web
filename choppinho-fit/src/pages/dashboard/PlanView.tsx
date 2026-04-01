@@ -200,8 +200,10 @@ export default function PlanView() {
   const loadPlan = async (id: string) => {
     try {
       const result = await getTrainingPlan(id);
-      if (result?.data) {
-        setPlan(result.data);
+      // API returns { success, data: { plan: {...} } }
+      const planRecord = result?.data?.plan || result?.data;
+      if (planRecord && planRecord.id) {
+        setPlan(planRecord);
       } else {
         setError('Plano não encontrado.');
       }
