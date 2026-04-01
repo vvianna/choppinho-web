@@ -260,6 +260,15 @@ export default function TrainingForm() {
   const handleGenerate = async () => {
     setGenerating(true);
     try {
+      console.log('Generating plan with input:', {
+        raceDistance: formData.raceDistance,
+        raceDate: formData.raceDate,
+        experienceLevel: formData.experienceLevel,
+        currentWeeklyKm: Number(formData.weeklyKm) || 20,
+        daysPerWeek: formData.daysPerWeek,
+        vdot: estimatedVdot,
+      });
+
       const plan = generatePlan({
         raceDistance: formData.raceDistance,
         raceDate: formData.raceDate,
@@ -269,6 +278,8 @@ export default function TrainingForm() {
         vdot: estimatedVdot,
         crossTraining: formData.crossTraining,
       });
+
+      console.log('Plan generated:', { weeks: plan.weeks.length, totalKm: plan.totalKm, vdot: plan.vdotScore });
 
       const result = await createTrainingPlan({
         ...formData,
@@ -296,9 +307,13 @@ export default function TrainingForm() {
         stress_level: formData.stressLevel || 'moderate',
       });
 
-      if (result?.data?.id) {
-        navigate(`/dashboard/treino/plano/${result.data.id}`);
+      console.log('createTrainingPlan result:', result);
+
+      const planId = result?.data?.plan?.id || result?.data?.id;
+      if (planId) {
+        navigate(`/dashboard/treino/plano/${planId}`);
       } else {
+        console.warn('No plan ID in response, navigating to list. Result:', result);
         navigate('/dashboard/treino');
       }
     } catch (err) {
