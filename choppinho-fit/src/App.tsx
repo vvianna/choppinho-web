@@ -6,6 +6,7 @@ import Dashboard from "./pages/dashboard/Index";
 import Settings from "./pages/dashboard/Settings";
 import Training from "./pages/dashboard/Training";
 import TrainingForm from "./pages/dashboard/TrainingForm";
+import Activities from "./pages/dashboard/Activities";
 import PlanView from "./pages/dashboard/PlanView";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -43,6 +44,7 @@ function App() {
         <Route path="/dashboard/treino" element={<ProtectedRoute><Training /></ProtectedRoute>} />
         <Route path="/dashboard/treino/novo/:raceId?" element={<ProtectedRoute><TrainingForm /></ProtectedRoute>} />
         <Route path="/dashboard/treino/plano/:planId" element={<ProtectedRoute><PlanView /></ProtectedRoute>} />
+        <Route path="/dashboard/atividades" element={<ProtectedRoute><Activities /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   );

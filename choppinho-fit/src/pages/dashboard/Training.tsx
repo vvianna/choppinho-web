@@ -15,6 +15,7 @@ import {
   Hash,
   Target,
   Clock,
+  Activity as ActivityIcon,
 } from "lucide-react";
 import { getAuthHeaders, clearSession } from "../../lib/auth";
 import { getTrainingPlans } from "../../lib/api";
@@ -315,6 +316,15 @@ export default function Training() {
             >
               <Trophy size={16} />
               <span className="hidden sm:inline">Minhas Provas</span>
+            </button>
+
+            <button
+              onClick={() => navigate("/dashboard/atividades")}
+              className="flex items-center gap-1 sm:gap-2 text-bark/60 hover:text-primary font-body text-sm transition-colors p-2 sm:p-0"
+              title="Atividades"
+            >
+              <ActivityIcon size={16} />
+              <span className="hidden sm:inline">Atividades</span>
             </button>
 
             <button

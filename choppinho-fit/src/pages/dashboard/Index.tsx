@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   Activity,
+  Activity as ActivityIcon,
   BarChart3,
   Calendar,
   Clock,
@@ -119,6 +120,15 @@ export default function Dashboard() {
             >
               <Trophy size={16} />
               <span className="hidden sm:inline">Minhas Provas</span>
+            </button>
+
+            <button
+              onClick={() => navigate("/dashboard/atividades")}
+              className="flex items-center gap-1 sm:gap-2 text-bark/60 hover:text-primary font-body text-sm transition-colors p-2 sm:p-0"
+              title="Atividades"
+            >
+              <ActivityIcon size={16} />
+              <span className="hidden sm:inline">Atividades</span>
             </button>
 
             <button
