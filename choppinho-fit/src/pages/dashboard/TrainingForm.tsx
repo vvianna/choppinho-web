@@ -260,15 +260,7 @@ export default function TrainingForm() {
   const handleGenerate = async () => {
     setGenerating(true);
     try {
-      console.log('Generating plan with input:', {
-        raceDistance: formData.raceDistance,
-        raceDate: formData.raceDate,
-        experienceLevel: formData.experienceLevel,
-        currentWeeklyKm: Number(formData.weeklyKm) || 20,
-        daysPerWeek: formData.daysPerWeek,
-        vdot: estimatedVdot,
-      });
-
+      // 1. Generate plan algorithmically (instant, local)
       const plan = generatePlan({
         raceDistance: formData.raceDistance,
         raceDate: formData.raceDate,
@@ -281,9 +273,66 @@ export default function TrainingForm() {
 
       console.log('Plan generated:', { weeks: plan.weeks.length, totalKm: plan.totalKm, vdot: plan.vdotScore });
 
+      // 2. Try AI enhancement (may fail gracefully)
+      let aiInsights = null;
+      try {
+        const enhanceRes = await fetch('/api/training-plans/enhance', {
+          method: 'POST',
+          headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            training_plan: {
+              totalWeeks: plan.totalWeeks,
+              totalKm: plan.totalKm,
+              vdotScore: plan.vdotScore,
+              peakVolume: plan.peakVolume,
+              paces: plan.paces,
+              // Send summary, not all weeks (too much data)
+              phases: plan.weeks.reduce((acc: any, w) => {
+                if (!acc[w.phase]) acc[w.phase] = { weeks: 0, avgKm: 0, totalKm: 0 };
+                acc[w.phase].weeks++;
+                acc[w.phase].totalKm += w.targetKm;
+                acc[w.phase].avgKm = Math.round(acc[w.phase].totalKm / acc[w.phase].weeks);
+                return acc;
+              }, {}),
+            },
+            runner_profile: {
+              name: formData.runnerName,
+              age: formData.age,
+              gender: formData.gender,
+              weight: formData.weight,
+              height: formData.height,
+              experience_level: formData.experienceLevel,
+              weekly_km: formData.weeklyKm,
+              longest_run: formData.longestRun,
+              days_per_week: formData.daysPerWeek,
+              race_distance: formData.raceDistance,
+              race_name: formData.raceName,
+              race_date: formData.raceDate,
+              goal_type: formData.goalType,
+              target_time: formData.targetTime,
+              injuries: formData.injuries,
+              vdot_score: estimatedVdot?.vdot || 0,
+              easy_pace: estimatedVdot?.e || '',
+            },
+          }),
+        });
+
+        if (enhanceRes.ok) {
+          const enhanceData = await enhanceRes.json();
+          if (enhanceData.success && enhanceData.data?.ok && enhanceData.data?.insights) {
+            aiInsights = enhanceData.data.insights;
+            console.log('AI insights received');
+          }
+        }
+      } catch (err) {
+        console.warn('AI enhancement failed (continuing without):', err);
+      }
+
+      // 3. Save to DB with AI insights if available
       const result = await createTrainingPlan({
         ...formData,
         plan_data: plan,
+        ai_insights: aiInsights,
         vdot_score: plan.vdotScore,
         total_weeks: plan.totalWeeks,
         status: 'active',
@@ -309,6 +358,7 @@ export default function TrainingForm() {
 
       console.log('createTrainingPlan result:', result);
 
+      // 4. Navigate to plan view
       const planId = result?.data?.plan?.id || result?.data?.id;
       if (planId) {
         navigate(`/dashboard/treino/plano/${planId}`);
@@ -530,7 +580,21 @@ export default function TrainingForm() {
         {/* ── Steps 1-7: Form Steps ── */}
         {currentStep >= 1 && currentStep <= TOTAL_STEPS && (
           <div className="space-y-6">
+            {/* Generating loading overlay */}
+            {generating && (
+              <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 border border-primary/10 text-center">
+                <div className="text-5xl mb-4">⚡</div>
+                <h2 className="font-display font-bold text-xl text-bark mb-2">Gerando seu plano...</h2>
+                <p className="text-sm text-bark/60 font-body mb-6">O Coach Choppinho está montando seu treino personalizado</p>
+                <div className="w-48 h-2 bg-bark/10 rounded-full mx-auto overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-primary to-accent rounded-full animate-pulse" style={{width: '70%'}} />
+                </div>
+                <p className="text-xs text-bark/40 mt-4">Isso pode levar até 30 segundos</p>
+              </div>
+            )}
+
             {/* Step content */}
+            {!generating && (
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-primary/10 min-h-[300px]">
               {currentStep === 1 && (
                 <FormStepProfile data={formData} onChange={handleChange} />
@@ -555,8 +619,10 @@ export default function TrainingForm() {
                 />
               )}
             </div>
+            )}
 
             {/* Navigation buttons */}
+            {!generating && (
             <div className="flex gap-3">
               <button
                 onClick={() => setCurrentStep(s => s - 1)}
@@ -589,6 +655,7 @@ export default function TrainingForm() {
                 </button>
               )}
             </div>
+            )}
           </div>
         )}
       </div>

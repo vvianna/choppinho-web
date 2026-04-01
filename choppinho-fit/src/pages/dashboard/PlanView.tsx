@@ -397,6 +397,80 @@ export default function PlanView() {
           </div>
         </div>
 
+        {/* ── Coach Choppinho AI Insights ── */}
+        {plan.ai_insights && (
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-primary/10 mb-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-lg">🏃</div>
+              <div>
+                <h3 className="font-display font-bold text-bark text-sm">Coach Choppinho</h3>
+                <span className="text-xs font-bold px-2 py-0.5 rounded bg-purple-100 text-purple-700">AI</span>
+              </div>
+            </div>
+
+            {/* Greeting + Analysis */}
+            {plan.ai_insights.greeting && (
+              <p className="text-sm text-bark/80 font-body mb-3">{plan.ai_insights.greeting}</p>
+            )}
+            {plan.ai_insights.analysis && (
+              <p className="text-sm text-bark/70 font-body mb-4">{plan.ai_insights.analysis}</p>
+            )}
+
+            {/* Strengths + Warnings */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+              {plan.ai_insights.strengths && (
+                <div className="bg-green-50 border border-green-200 rounded-xl p-3">
+                  <p className="text-xs font-bold text-green-700 mb-2">💪 Pontos fortes</p>
+                  <ul className="space-y-1">
+                    {plan.ai_insights.strengths.map((s: string, i: number) => (
+                      <li key={i} className="text-xs text-green-800">{s}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {plan.ai_insights.warnings && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3">
+                  <p className="text-xs font-bold text-yellow-700 mb-2">⚠️ Atenção</p>
+                  <ul className="space-y-1">
+                    {plan.ai_insights.warnings.map((w: string, i: number) => (
+                      <li key={i} className="text-xs text-yellow-800">{w}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            {/* Main tip */}
+            {plan.ai_insights.main_tip && (
+              <div className="bg-primary/5 border border-primary/20 rounded-xl p-3">
+                <p className="text-xs font-bold text-primary mb-1">💡 Dica principal</p>
+                <p className="text-sm text-bark/80 font-body">{plan.ai_insights.main_tip}</p>
+              </div>
+            )}
+
+            {/* Nutrition */}
+            {plan.ai_insights.nutrition && (
+              <div className="mt-4">
+                <p className="text-xs font-bold text-bark/60 mb-2">🍎 Nutrição para o longão</p>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="bg-bark/5 rounded-lg p-2">
+                    <p className="text-xs font-bold text-bark">Pré</p>
+                    <p className="text-xs text-bark/60">{plan.ai_insights.nutrition.pre}</p>
+                  </div>
+                  <div className="bg-bark/5 rounded-lg p-2">
+                    <p className="text-xs font-bold text-bark">Durante</p>
+                    <p className="text-xs text-bark/60">{plan.ai_insights.nutrition.during}</p>
+                  </div>
+                  <div className="bg-bark/5 rounded-lg p-2">
+                    <p className="text-xs font-bold text-bark">Pós</p>
+                    <p className="text-xs text-bark/60">{plan.ai_insights.nutrition.post}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* ── Pace Zones Card ── */}
         {PACE_ZONES.length > 0 && (
           <div className="bg-white/90 backdrop-blur-sm rounded-2xl border border-primary/10 p-5">
