@@ -80,7 +80,8 @@ export const PHASE_RATIOS: Record<PhaseName, number> = {
 export function distributePhases(
   totalWeeks: number,
 ): { phase: PhaseName; weeks: number }[] {
-  const taper = Math.max(1, Math.round(totalWeeks * PHASE_RATIOS.taper));
+  const minTaper = totalWeeks >= 8 ? 2 : 1;
+  const taper = Math.max(minTaper, Math.round(totalWeeks * PHASE_RATIOS.taper));
   const remaining = totalWeeks - taper;
   const base = Math.max(1, Math.round(remaining * (PHASE_RATIOS.base / (1 - PHASE_RATIOS.taper))));
   const build = Math.max(1, Math.round(remaining * (PHASE_RATIOS.build / (1 - PHASE_RATIOS.taper))));
@@ -326,10 +327,13 @@ export function buildWeekSessions(input: WeekSessionInput): PlanSession[] {
     }
   }
 
-  // Redistribute remaining km to easy sessions
+  // Redistribute remaining km to easy sessions, capped at 12km per easy run
   const easySessions = otherSessions.filter(t => !qualityTypes.has(t));
   const easyTotalBudget = remainingKm - qualityTotalKm;
-  const kmPerEasy = easySessions.length > 0 ? easyTotalBudget / easySessions.length : baseKmPerSession;
+  const maxEasyKm = 12;
+  const kmPerEasy = easySessions.length > 0
+    ? Math.min(easyTotalBudget / easySessions.length, maxEasyKm)
+    : Math.min(baseKmPerSession, maxEasyKm);
 
   // Second pass: build session list with correct km
   let qualityIdx = 0;

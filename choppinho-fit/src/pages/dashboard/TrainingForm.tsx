@@ -260,81 +260,77 @@ export default function TrainingForm() {
   const handleGenerate = async () => {
     setGenerating(true);
     try {
-      // 1. Generate plan algorithmically (instant, local)
-      const plan = generatePlan({
-        raceDistance: formData.raceDistance,
-        raceDate: formData.raceDate,
-        experienceLevel: formData.experienceLevel || 'intermediate',
-        currentWeeklyKm: Number(formData.weeklyKm) || 20,
-        daysPerWeek: formData.daysPerWeek,
-        vdot: estimatedVdot,
-        crossTraining: formData.crossTraining,
-      });
+      let planData = null;
+      let aiCoaching = null;
 
-      console.log('Plan generated:', { weeks: plan.weeks.length, totalKm: plan.totalKm, vdot: plan.vdotScore });
-
-      // 2. Try AI enhancement (may fail gracefully)
-      let aiInsights = null;
+      // 1. Try AI generation via Opus (preferred)
       try {
-        const enhanceRes = await fetch('/api/training-plans/enhance', {
+        const genRes = await fetch('/api/training-plans/generate', {
           method: 'POST',
           headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            training_plan: {
-              totalWeeks: plan.totalWeeks,
-              totalKm: plan.totalKm,
-              vdotScore: plan.vdotScore,
-              peakVolume: plan.peakVolume,
-              paces: plan.paces,
-              // Send summary, not all weeks (too much data)
-              phases: plan.weeks.reduce((acc: any, w) => {
-                if (!acc[w.phase]) acc[w.phase] = { weeks: 0, avgKm: 0, totalKm: 0 };
-                acc[w.phase].weeks++;
-                acc[w.phase].totalKm += w.targetKm;
-                acc[w.phase].avgKm = Math.round(acc[w.phase].totalKm / acc[w.phase].weeks);
-                return acc;
-              }, {}),
-            },
             runner_profile: {
               name: formData.runnerName,
-              age: formData.age,
-              gender: formData.gender,
-              weight: formData.weight,
-              height: formData.height,
-              experience_level: formData.experienceLevel,
-              weekly_km: formData.weeklyKm,
-              longest_run: formData.longestRun,
+              age: formData.age || null,
+              gender: formData.gender || null,
+              weight: formData.weight || null,
+              height: formData.height || null,
+              experience_level: formData.experienceLevel || 'intermediate',
+              weekly_km: Number(formData.weeklyKm) || 20,
+              longest_run: Number(formData.longestRun) || null,
               days_per_week: formData.daysPerWeek,
               race_distance: formData.raceDistance,
               race_name: formData.raceName,
               race_date: formData.raceDate,
-              goal_type: formData.goalType,
-              target_time: formData.targetTime,
-              injuries: formData.injuries,
+              race_terrain: formData.raceTerrain,
+              goal_type: formData.goalType || 'finish',
+              target_time: formData.targetTime || null,
+              injuries: formData.injuries || null,
+              cross_training: formData.crossTraining,
+              recent_race_distance: formData.recentRaceDistance || null,
+              recent_race_time: formData.recentRaceTime || null,
               vdot_score: estimatedVdot?.vdot || 0,
-              easy_pace: estimatedVdot?.e || '',
+              easy_pace: estimatedVdot?.e || null,
+              preferred_time: formData.preferredTime,
+              has_watch: formData.hasWatch,
+              uses_heart_rate: formData.usesHeartRate,
             },
           }),
         });
 
-        if (enhanceRes.ok) {
-          const enhanceData = await enhanceRes.json();
-          if (enhanceData.success && enhanceData.data?.ok && enhanceData.data?.insights) {
-            aiInsights = enhanceData.data.insights;
-            console.log('AI insights received');
+        if (genRes.ok) {
+          const genData = await genRes.json();
+          if (genData.success && genData.data?.ok) {
+            planData = genData.data.plan;
+            aiCoaching = genData.data.coaching;
+            console.log('AI plan generated successfully');
           }
         }
       } catch (err) {
-        console.warn('AI enhancement failed (continuing without):', err);
+        console.warn('AI generation failed, falling back to algorithmic:', err);
       }
 
-      // 3. Save to DB with AI insights if available
+      // 2. Fallback: local algorithmic generation
+      if (!planData) {
+        console.log('Using algorithmic fallback');
+        const plan = generatePlan({
+          raceDistance: formData.raceDistance,
+          raceDate: formData.raceDate,
+          experienceLevel: formData.experienceLevel || 'intermediate',
+          currentWeeklyKm: Number(formData.weeklyKm) || 20,
+          daysPerWeek: formData.daysPerWeek,
+          vdot: estimatedVdot,
+          crossTraining: formData.crossTraining,
+        });
+        planData = plan;
+      }
+
+      // 3. Save to DB
       const result = await createTrainingPlan({
-        ...formData,
-        plan_data: plan,
-        ai_insights: aiInsights,
-        vdot_score: plan.vdotScore,
-        total_weeks: plan.totalWeeks,
+        plan_data: planData,
+        ai_insights: aiCoaching,
+        vdot_score: planData.vdotScore || estimatedVdot?.vdot || 0,
+        total_weeks: planData.totalWeeks || planData.weeks?.length || 0,
         status: 'active',
         race_distance: formData.raceDistance,
         race_name: formData.raceName,
@@ -356,14 +352,13 @@ export default function TrainingForm() {
         stress_level: formData.stressLevel || 'moderate',
       });
 
-      console.log('createTrainingPlan result:', result);
-
       // 4. Navigate to plan view
       const planId = result?.data?.plan?.id || result?.data?.id;
       if (planId) {
         navigate(`/dashboard/treino/plano/${planId}`);
       } else {
-        console.warn('No plan ID in response, navigating to list. Result:', result);
+        console.warn('No plan ID in response:', result);
+        setToast({ message: 'Plano gerado! Redirecionando...', type: 'success' });
         navigate('/dashboard/treino');
       }
     } catch (err) {
