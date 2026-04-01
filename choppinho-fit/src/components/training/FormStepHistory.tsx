@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import type { TrainingFormData } from '../../pages/dashboard/TrainingForm';
 import type { StravaAnalysis } from '../../lib/strava-analyzer';
 import type { Activity } from '../../lib/types';
@@ -30,6 +31,21 @@ function StravaBadge() {
 
 export default function FormStepHistory({ data, onChange, stravaAnalysis, recentActivities }: FormStepProps) {
   const hasStrava = !!stravaAnalysis;
+
+  useEffect(() => {
+    // Auto-select the first race-marked activity if no race is already selected
+    if (recentActivities && !data.recentRaceDistance) {
+      const raceActivity = recentActivities.find(a => a.activity_type === 'Run' && a.workout_type === 1);
+      if (raceActivity) {
+        const distKey = raceActivity.distance_meters < 7000 ? '5k' : raceActivity.distance_meters < 12000 ? '10k' : raceActivity.distance_meters < 16000 ? '15k' : raceActivity.distance_meters < 25000 ? '21k' : '42k';
+        const mins = Math.floor(raceActivity.moving_time_seconds / 60);
+        const secs = raceActivity.moving_time_seconds % 60;
+        const timeStr = `${mins}:${secs.toString().padStart(2, '0')}`;
+        onChange({ recentRaceDistance: distKey, recentRaceTime: timeStr });
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recentActivities]);
 
   return (
     <div>
@@ -170,6 +186,7 @@ export default function FormStepHistory({ data, onChange, stravaAnalysis, recent
               </button>
               {recentActivities
                 .filter(a => a.activity_type === 'Run')
+                .sort((a, b) => (b.workout_type === 1 ? 1 : 0) - (a.workout_type === 1 ? 1 : 0))
                 .slice(0, 10)
                 .map(activity => {
                   const km = (activity.distance_meters / 1000).toFixed(1);
@@ -192,6 +209,11 @@ export default function FormStepHistory({ data, onChange, stravaAnalysis, recent
                       }`}
                     >
                       <span className="font-semibold">{activity.name}</span>
+                      {activity.workout_type === 1 && (
+                        <span className={`text-xs font-bold px-1.5 py-0.5 rounded ml-1.5 ${isSelected ? 'bg-white/30 text-white' : 'bg-accent/20 text-accent'}`}>
+                          PROVA
+                        </span>
+                      )}
                       <span className={`text-xs ${isSelected ? 'text-white/70' : 'text-bark/50'} ml-2`}>
                         {date} · {km}km · {timeStr}
                       </span>

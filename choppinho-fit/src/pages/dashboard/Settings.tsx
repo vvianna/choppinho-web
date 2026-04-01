@@ -23,6 +23,11 @@ export default function Settings() {
   const [nicknames, setNicknames] = useState<string[]>([]);
   const [newNickname, setNewNickname] = useState("");
   const [personalityMode, setPersonalityMode] = useState<"default" | "offensive" | "light_zen">("default");
+  const [age, setAge] = useState<number | ''>('');
+  const [gender, setGender] = useState('');
+  const [weight, setWeight] = useState<number | ''>('');
+  const [height, setHeight] = useState<number | ''>('');
+  const [city, setCity] = useState('');
 
   // Strava state
   const [stravaConnected, setStravaConnected] = useState(false);
@@ -55,6 +60,11 @@ export default function Settings() {
       setEmail(userData.email || "");
       setNicknames(userData.nicknames || []);
       setPersonalityMode(userData.personality_mode || "default");
+      setAge(userData.age || '');
+      setGender(userData.gender || '');
+      setWeight(userData.weight || '');
+      setHeight(userData.height || '');
+      setCity(userData.city || '');
       setLoading(false);
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -111,6 +121,11 @@ export default function Settings() {
           email: email || null,
           nicknames,
           personality_mode: personalityMode,
+          age: Number(age) || null,
+          gender: gender || null,
+          weight: Number(weight) || null,
+          height: Number(height) || null,
+          city: city || null,
         }),
       });
 
@@ -303,6 +318,81 @@ export default function Settings() {
               <p className="text-xs text-bark/50 mt-1">
                 Telefone não pode ser alterado
               </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Dados Físicos */}
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-primary/10">
+          <h3 className="font-display font-bold text-lg text-bark mb-4 flex items-center gap-2">
+            📏 Dados Físicos
+          </h3>
+
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-semibold text-bark mb-2">Idade</label>
+              <input
+                type="number"
+                value={age}
+                onChange={(e) => setAge(e.target.value === '' ? '' : Number(e.target.value))}
+                placeholder="Ex: 34"
+                className="w-full px-4 py-3 rounded-xl border border-bark/20 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors font-body"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-bark mb-2">Gênero</label>
+              <div className="flex gap-2">
+                {[
+                  { value: 'm', label: 'Masculino' },
+                  { value: 'f', label: 'Feminino' },
+                  { value: 'o', label: 'Outro' },
+                ].map(g => (
+                  <button
+                    key={g.value}
+                    type="button"
+                    onClick={() => setGender(g.value)}
+                    className={`flex-1 px-3 py-3 rounded-xl border font-semibold text-sm transition-all ${
+                      gender === g.value
+                        ? 'bg-primary text-white border-primary'
+                        : 'bg-white border-bark/20 text-bark hover:border-primary/40'
+                    }`}
+                  >{g.label}</button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-semibold text-bark mb-2">Peso (kg)</label>
+              <input
+                type="number"
+                step="0.1"
+                value={weight}
+                onChange={(e) => setWeight(e.target.value === '' ? '' : Number(e.target.value))}
+                placeholder="Ex: 78"
+                className="w-full px-4 py-3 rounded-xl border border-bark/20 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors font-body"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-bark mb-2">Altura (cm)</label>
+              <input
+                type="number"
+                value={height}
+                onChange={(e) => setHeight(e.target.value === '' ? '' : Number(e.target.value))}
+                placeholder="Ex: 176"
+                className="w-full px-4 py-3 rounded-xl border border-bark/20 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors font-body"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-bark mb-2">Cidade</label>
+              <input
+                type="text"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="Ex: Rio de Janeiro"
+                className="w-full px-4 py-3 rounded-xl border border-bark/20 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors font-body"
+              />
             </div>
           </div>
         </div>
